@@ -1,0 +1,16 @@
+{
+  "network": "testnet",
+  "networkPassphrase": "Test SDF Network ; September 2015",
+  "ruleRegistry": "CDEXDT6BPD5XM7ASG2DQNVEJK37MX75TNSF4F27RD7LU5N7EPKVLOWCB",
+  "deployTx": "7a150b71eae485498dc06ca49ce0b88835da9671b87bac937714e531e7352534",
+  "accounts": {
+    "registryAdmin": "GB5HAJ2FBMUR6NMQG7EH2A4OFA5F7K4ZIIKW6OTMWZDIA66ROL4QIBZJ",
+    "operatorNG": "GDVGM6TDBDSVUUPNDAMFJ75EASQE6334SPN4CB56UZCHQRUYCYOGHO56",
+    "operatorGH": "GBAUHAITOZEFV6ZUFLQ5WBGRZYQ6SBB6FOSIPCHMCL5HJ66UFYBXH5PR"
+  },
+  "jurisdictions": {
+    "566": { "name": "Nigeria", "packVersion": 1, "packHash": "793274114535773168330462619525225772468182337604504132993004277258700724562", "illustrative": true },
+    "288": { "name": "Ghana", "packVersion": 1, "packHash": "15352878594874501808841481184584733912846590580291801597728574576845088907239", "illustrative": true }
+  },
+  "corridors": [{ "from": 566, "to": 288, "open": true }]
+}

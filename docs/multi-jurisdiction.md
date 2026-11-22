@@ -85,3 +85,15 @@ Check these sources and fill in the table:
 | Baseline | FATF Recommendation 16 | https://www.fatf-gafi.org | USD/EUR 1,000 de minimis |
 
 Until those are confirmed, demo packs are labelled **illustrative** in the UI and pitch.
+
+## Live on testnet (22 Nov)
+
+Registry `CDEXDT6BPD5XM7ASG2DQNVEJK37MX75TNSF4F27RD7LU5N7EPKVLOWCB`: NG (566) and GH (288) registered,
+each with its own operator account and Baby JubJub operator key (generated with upstream
+`gvkey-gen`; private keys in `.secrets/`, never committed), v1 packs published (illustrative limits),
+and the NG to GH corridor open on both sides. See `deployments/testnet.json`. Re-run with
+`python3 scripts/seed-testnet.py`.
+
+Container note: the `stellar` CLI's RPC client ignores `HTTPS_PROXY`, so in this cloud container it
+goes through `scripts/rpc-relay.mjs` (run with `NODE_USE_ENV_PROXY=1`), registered as network
+`clr-testnet`. On your laptop, use `--network testnet` directly.

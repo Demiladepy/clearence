@@ -57,7 +57,10 @@ Before using these, check that upstream doesn't already reserve 0x07 and above.
 | `policy_tx_2_2_A` (+ allow-list) | 16,656 | 9 | |
 | `policy_tx_2_2_A_gvk_V` (+ operator view key) | **26,040** | 12 | **our base**; prove and verify < 1.9 s |
 | One GVK sealed record | about 4,700 | | (26,040 - 16,656) / 2 outputs |
+| `PackHash` (Clearance) | 2,640 | 1 output | x2 for sender + receiver packs |
 
 - Poseidon2 parity: circuit vs Rust reference passes (`prove_poseidon2` tests). The contract vs
   Rust reference check is upstream's `asp-membership` tests.
+- Pack-hash parity: contract (`pack_hash_matches_testnet_and_circuit_golden_values`), Rust reference and
+  circuit (`prove_pack_hash`) all reproduce the NG and GH v1 hashes live on the testnet registry.
 - Still to measure: proving time in Chrome (WASM) and on-chain verification cost on testnet.

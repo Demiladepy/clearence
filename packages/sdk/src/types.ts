@@ -8,8 +8,15 @@
 
 export type Network = "testnet" | "local";
 
-/** Rule pack identifiers. Rules are in USD on-chain; NGN is display-only. */
-export type PackId = "NG-2026-v1" | "GH-2026-v1";
+/**
+ * ISO 3166-1 numeric jurisdiction codes, as stored in the rule registry.
+ * Adding a country is a registry call, not an SDK release.
+ */
+export const JURISDICTIONS = { NG: 566, GH: 288, KE: 404, ZA: 710 } as const;
+export type JurisdictionCode = keyof typeof JURISDICTIONS;
+
+/** A pack is identified by jurisdiction + version, e.g. "NG-v1". */
+export type PackId = `${JurisdictionCode}-v${number}`;
 
 export type Tier = 1 | 2 | 3;
 
@@ -35,19 +42,36 @@ export interface TierLimits {
 }
 
 export interface RulePack {
-  id: PackId;
+  jurisdiction: JurisdictionCode;
   version: number;
-  country: "NG" | "GH";
-  /** Display currency shown first in the UI. */
-  localCurrency: "NGN" | "GHS";
-  /** Fixed, labelled display rate. Not a price feed. */
-  localPerUsd: number;
-  /** Travel Rule threshold in USD (CBN 26.14.3: USD/EUR 1,000). */
+  id: PackId;
+  /** Budget day rolls over at local midnight. */
+  utcOffsetSecs: number;
+  /** Travel Rule threshold in USD (stored on-chain as USDC stroops). */
   travelRuleThresholdUsd: number;
   tiers: Record<Tier, TierLimits>;
-  /** Poseidon2 hash of the pack values, hex. Public: appears in every proof. */
+  /** Operator's Baby JubJub public key, hex coordinates. */
+  operatorKey: { x: string; y: string };
+  /** Poseidon2 hash computed on-chain by the registry. Public in every proof. */
   packHash: string;
-  activatedAt: string; // ISO
+  publishedAt: string; // ISO
+}
+
+/** Display-only currency info. Never on-chain; always labelled as a fixed rate. */
+export interface DisplayCurrency {
+  code: "NGN" | "GHS" | "KES" | "ZAR" | "USD";
+  perUsd: number;
+  label: string;
+}
+
+/** Cross-border corridor state from the registry. */
+export interface Corridor {
+  from: JurisdictionCode;
+  to: JurisdictionCode;
+  /** Opened by the sender's operator. */
+  opened: boolean;
+  /** Accepted by the receiver's operator. */
+  accepted: boolean;
 }
 
 /** The checks a proof establishes. Drives the proof panel. */
@@ -76,6 +100,8 @@ export interface ProofProgress {
 export interface SendParams {
   /** Recipient: Stellar address or Clearance shielded address. */
   to: Address;
+  /** Recipient's jurisdiction. Omit for domestic. Cross-border needs an open corridor. */
+  toJurisdiction?: JurisdictionCode;
   amountUsd: number;
   /** Optional: drive the proof-panel animation. */
   onProgress?: (p: ProofProgress) => void;
@@ -88,6 +114,8 @@ export interface Receipt {
   /** stellar.expert link for the "Verified on Stellar" button. */
   explorerUrl: string;
   packId: PackId;
+  /** Receiver's pack for cross-border; same as packId when domestic. */
+  receiverPackId: PackId;
   /** Budget after this payment. */
   budget: Budget;
 }
@@ -123,10 +151,15 @@ export interface PublicTransferView {
   /** What a block explorer shows. Note: no amount, no counterparty. */
   nullifiers: string[];
   outputCommitments: string[];
-  packHash: string;
+  senderPackHash: string;
+  receiverPackHash: string;
   epoch: number;
-  /** Sealed record bytes, hex. Same length on every transfer. */
-  sealedRecordHex: string;
+  /**
+   * Two sealed records on every transfer: one to the sender's operator, one to
+   * the receiver's. Domestic transfers seal both to the same operator, so a
+   * cross-border payment looks identical on-chain.
+   */
+  sealedRecordsHex: [string, string];
   proofVerified: true;
 }
 
@@ -138,7 +171,7 @@ export interface SealedRecordSummary {
   timestamp: string;
   epoch: number;
   packId: PackId;
-  /** Ciphertext stays locked until openRecord. */
+  /** This operator's copy. Stays locked until openRecord. */
   sealedRecordHex: string;
 }
 
@@ -150,6 +183,8 @@ export interface OpenedRecord {
   amountUsd: number;
   epoch: number;
   travelRuleFlag: boolean;
+  senderJurisdiction: JurisdictionCode;
+  receiverJurisdiction: JurisdictionCode;
   packVersion: PackId;
 }
 
@@ -166,4 +201,4 @@ export interface ListRecordsParams {
   to?: string | Date;
 }
 
-export type PackChangedEvent = { packId: PackId; packHash: string; at: string };
+export type PackChangedEvent = { jurisdiction: JurisdictionCode; version: number; packHash: string };

@@ -49,10 +49,15 @@ Before using these, check that upstream doesn't already reserve 0x07 and above.
   (a) reuses upstream code. Lean (a).
 - **epoch:** the contract computes it from `env.ledger().timestamp() / 86400` and passes it as a public input.
 
-## Not done today (blocked)
+## Measured (this container: 4 vCPU, native Rust prover, release build)
 
-- Building the circuits and running upstream tests (`make circuits`, cargo tests): the session's
-  auto-mode permission check denied running the upstream build, so it needs your OK.
-- Testnet run, proving time, verification cost: Stellar testnet hosts
-  (`soroban-testnet.stellar.org`, `friendbot.stellar.org`, `horizon-testnet.stellar.org`) are not
-  reachable from this environment's network policy.
+| Circuit | Constraints | Public inputs | Notes |
+|---|---|---|---|
+| `policy_tx_2_2` (base transfer) | 11,816 | 7 | |
+| `policy_tx_2_2_A` (+ allow-list) | 16,656 | 9 | |
+| `policy_tx_2_2_A_gvk_V` (+ operator view key) | **26,040** | 12 | **our base**; prove and verify < 1.9 s |
+| One GVK sealed record | about 4,700 | | (26,040 - 16,656) / 2 outputs |
+
+- Poseidon2 parity: circuit vs Rust reference passes (`prove_poseidon2` tests). The contract vs
+  Rust reference check is upstream's `asp-membership` tests.
+- Still to measure: proving time in Chrome (WASM) and on-chain verification cost on testnet.

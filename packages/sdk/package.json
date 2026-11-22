@@ -1,6 +1,6 @@
 {
   "name": "@clearance/sdk",
-  "version": "0.1.0-mock",
+  "version": "0.1.0",
   "description": "Clearance: Travel-Rule-ready private payments on Stellar (mock SDK)",
   "type": "module",
   "main": "./dist/index.js",

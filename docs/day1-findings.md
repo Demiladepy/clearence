@@ -30,13 +30,13 @@ Upstream: `NethermindEth/stellar-private-payments` @ `cd6c8fc` (2026-11-20), clo
 
 | Tag | Use |
 |---|---|
-| 0x10 | `idCommitment = H(idSecret)` |
-| 0x11 | allow-list leaf `H(idCommitment, tier)` |
+| 0x10 | `idCommitment = H(idSecret, 0)`, `noteKey = H(idSecret, 1)` (implemented) |
+| 0x11 | allow-list leaf `H(H(idCommitment, jurisdiction, tier), issuance)` (implemented) |
 | 0x12 | `budgetNullifier = H(idSecret, epoch, seq)` |
 | 0x13 | `budgetCommitment = H(idCommitment, epoch, seq+1, newSpent, salt)` (chained, since Poseidon2 here takes ≤3 inputs) |
-| 0x14 | `packHash` |
+| 0x14 | `packHash` (implemented) |
 
-Before using these, check that upstream doesn't already reserve 0x07 and above.
+Checked: upstream uses only 0x01-0x06.
 
 ## Open design points (decide in Monday's spike)
 
@@ -58,9 +58,26 @@ Before using these, check that upstream doesn't already reserve 0x07 and above.
 | `policy_tx_2_2_A_gvk_V` (+ operator view key) | **26,040** | 12 | **our base**; prove and verify < 1.9 s |
 | One GVK sealed record | about 4,700 | | (26,040 - 16,656) / 2 outputs |
 | `PackHash` (Clearance) | 2,640 | 1 output | x2 for sender + receiver packs |
+| `ClearanceIdentity(10)` | 3,173 | 2 in, 4 out (test) | identity, tier leaf, depth-10 membership, tier limit select |
 
 - Poseidon2 parity: circuit vs Rust reference passes (`prove_poseidon2` tests). The contract vs
   Rust reference check is upstream's `asp-membership` tests.
 - Pack-hash parity: contract (`pack_hash_matches_testnet_and_circuit_golden_values`), Rust reference and
   circuit (`prove_pack_hash`) all reproduce the NG and GH v1 hashes live on the testnet registry.
 - Still to measure: proving time in Chrome (WASM) and on-chain verification cost on testnet.
+
+## Identity and tier (implemented)
+
+`circuits/src/clearance/identity.circom`, tests in `circuits/src/test/prove_identity.rs`.
+
+- The wallet holds one `idSecret` per person. It derives `idCommitment` (given to the operator at
+  KYC) and `noteKey` (the pool spending key), so every wallet of that person shares one identity.
+- The operator inserts `leaf = H(H(idCommitment, jurisdiction, tier), issuance)` into their own
+  country's allow-list (one upstream `asp-membership` instance per country, admin = that operator).
+- `jurisdiction` in the leaf: a Ghana KYC cannot prove under Nigeria's pack (tested).
+- `issuance`: after a revocation or tier change the operator issues a fresh leaf that does not
+  collide with the revoked one (tested). The revoked-set check itself comes with FR-6.
+- `TierSelect` outputs that tier's per-payment and daily limits from the sender pack and rejects any
+  tier outside 1-3, even if an operator issued one (tested).
+- Wiring into the transfer circuit: every input note's private key must equal `noteKey`, so notes
+  from a non-KYC'd key cannot be spent under someone else's identity. This is added with the budget step.

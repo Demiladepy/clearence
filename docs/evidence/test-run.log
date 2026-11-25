@@ -3,43 +3,49 @@ make[1]: Entering directory '/home/user/clearence'
 synced Clearance overlay into /home/user/clearence/upstream/nethermind-spp
 cd upstream/nethermind-spp && cargo test -p rule-registry
    Compiling rule-registry v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/rule-registry)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 36.41s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.88s
      Running unittests src/lib.rs (target/debug/deps/rule_registry-fe39deaf36d7f4fd)
 
 running 8 tests
 test test::corridors_need_both_sides ... ok
-test test::only_the_jurisdictions_own_admin_can_set_its_pack ... ok
 test test::epoch_rolls_at_local_midnight ... ok
 test test::onboards_kenya_and_south_africa_without_code_changes ... ok
-test test::rejects_bad_packs ... ok
 test test::hash_is_bound_to_jurisdiction_and_every_value ... ok
-test test::pack_hash_matches_testnet_and_circuit_golden_values ... ok
+test test::rejects_bad_packs ... ok
+test test::only_the_jurisdictions_own_admin_can_set_its_pack ... ok
 test test::publishes_versioned_packs_and_tracks_active ... ok
+test test::pack_hash_matches_testnet_and_circuit_golden_values ... ok
 
-test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
 
 cd upstream/nethermind-spp && cargo clippy -p rule-registry --tests -- -D warnings
-    Checking contract-types v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/types)
-    Checking soroban-utils v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/soroban-utils)
     Checking rule-registry v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/rule-registry)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.81s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.62s
 cd upstream/nethermind-spp && cargo test -p circuits --release clearance_ -- --include-ignored
    Compiling circuits v0.1.0 (/home/user/clearence/upstream/nethermind-spp/circuits)
-    Finished `release` profile [optimized] target(s) in 39.73s
+    Finished `release` profile [optimized] target(s) in 35.15s
      Running unittests src/lib.rs (target/release/deps/circuits-6a0672e1ad5022ad)
 
-running 9 tests
+running 17 tests
+test test::clearance_budget::tests::first_payment_of_the_day_starts_from_zero ... ok
+test test::clearance_budget::tests::another_persons_state_cannot_be_used ... ok
+test test::clearance_budget::tests::out_of_range_amounts_fail ... ok
+test test::clearance_budget::tests::outputs_match_the_rust_reference ... ok
+test test::clearance_budget::tests::daily_budget_under_at_over_across_payments ... ok
+test test::clearance_budget::tests::budget_resets_at_the_next_local_day_and_old_state_is_useless ... ok
 test test::clearance_identity::tests::cannot_claim_a_higher_tier_than_issued ... ok
-test test::clearance_identity::tests::reissued_leaf_after_revocation_is_distinct ... ok
-test test::clearance_identity::tests::someone_elses_secret_fails ... ok
+test test::clearance_budget::tests::per_payment_limit_under_at_over ... ok
 test test::clearance_identity::tests::ghana_kyc_does_not_prove_under_nigeria ... ok
-test test::clearance_identity::tests::tier_outside_1_to_3_fails_even_if_issued ... ok
-test test::clearance_pack_hash::tests::pack_hash_reference_matches_testnet_registry ... ok
+test test::clearance_identity::tests::someone_elses_secret_fails ... ok
 test test::clearance_identity::tests::each_tier_gets_its_own_limits ... ok
+test test::clearance_budget::tests::second_wallet_shares_the_budget ... ok
+test test::clearance_identity::tests::reissued_leaf_after_revocation_is_distinct ... ok
+test test::clearance_pack_hash::tests::pack_hash_reference_matches_testnet_registry ... ok
+test test::clearance_identity::tests::tier_outside_1_to_3_fails_even_if_issued ... ok
 test test::clearance_pack_hash::tests::pack_hash_circuit_rejects_a_changed_limit ... ok
 test test::clearance_pack_hash::tests::pack_hash_circuit_matches_testnet_registry ... ok
 
-test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 105 filtered out; finished in 2.39s
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 105 filtered out; finished in 5.23s
 
 pnpm -C packages/sdk typecheck
 

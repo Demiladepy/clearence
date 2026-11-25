@@ -1,0 +1,12 @@
+diff --git a/circuits/src/test/mod.rs b/circuits/src/test/mod.rs
+--- a/circuits/src/test/mod.rs
++++ b/circuits/src/test/mod.rs
+@@ -6,6 +6,8 @@
+ #![allow(missing_docs)]
+ 
++mod clearance_identity;
++mod clearance_pack_hash;
+ mod prove_merkle;
+ mod prove_poseidon2;
+ mod prove_sparse;
+ 

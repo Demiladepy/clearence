@@ -1,7 +1,7 @@
 {
   "name": "@clearance/sdk",
   "version": "0.1.0",
-  "description": "Clearance: Travel-Rule-ready private payments on Stellar (mock SDK)",
+  "description": "Clearance SDK: Travel-Rule-ready private payments on Stellar",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,10 +9,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./devtools": {
-      "types": "./dist/mock/devtools.d.ts",
-      "import": "./dist/mock/devtools.js"
     }
   },
   "files": [
@@ -20,8 +16,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "tsx --test test/*.test.ts"
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "license": "Apache-2.0",
   "devDependencies": {

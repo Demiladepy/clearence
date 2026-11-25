@@ -1,6 +1,8 @@
 node_modules
 dist
-vendor/
+target/
 *.log
+!docs/evidence/*.log
 .claude/settings.local.json
 .secrets/
+test_snapshots/

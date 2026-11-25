@@ -1,0 +1,4 @@
+[submodule "upstream/nethermind-spp"]
+	path = upstream/nethermind-spp
+	url = https://github.com/NethermindEth/stellar-private-payments.git
+	ignore = dirty

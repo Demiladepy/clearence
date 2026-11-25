@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Overlay Clearance's code onto the pinned upstream checkout so it builds with
+# upstream's toolchain (circuit compiler, Poseidon2, Soroban workspace).
+#
+# Our sources of truth live in this repo:
+#   circuits/src/*.circom          -> upstream circuits/src/clearance/
+#   circuits/test/circuits/*.circom-> upstream circuits/src/test/circuits/
+#   circuits/test/rust/*.rs        -> upstream circuits/src/test/
+#   contracts/rule-registry/       -> upstream contracts/rule-registry/
+#   upstream-patches/*.patch       -> applied to upstream (the only edits to upstream files)
+#
+# Idempotent: safe to run before every build. Never edit the copies inside
+# upstream/; edit the files in this repo and re-run.
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+UP="$ROOT/upstream/nethermind-spp"
+
+if [ ! -f "$UP/Cargo.toml" ]; then
+  git -C "$ROOT" submodule update --init upstream/nethermind-spp
+fi
+
+# 1. Revert previously applied patches, then re-apply (keeps upstream files exact).
+for p in "$ROOT"/upstream-patches/*.patch; do
+  git -C "$UP" apply -R --check "$p" 2>/dev/null && git -C "$UP" apply -R "$p"
+done
+for p in "$ROOT"/upstream-patches/*.patch; do
+  git -C "$UP" apply "$p"
+done
+
+# 2. Copy our sources (delete stale copies first, so renames do not linger).
+rm -rf "$UP/circuits/src/clearance" "$UP/contracts/rule-registry"
+rm -f "$UP"/circuits/src/test/clearance_*.rs
+mkdir -p "$UP/circuits/src/clearance"
+cp "$ROOT"/circuits/src/*.circom "$UP/circuits/src/clearance/"
+cp "$ROOT"/circuits/test/circuits/*.circom "$UP/circuits/src/test/circuits/"
+cp "$ROOT"/circuits/test/rust/*.rs "$UP/circuits/src/test/"
+mkdir -p "$UP/contracts"
+cp -r "$ROOT/contracts/rule-registry" "$UP/contracts/rule-registry"
+rm -rf "$UP/contracts/rule-registry/target"
+
+# 3. Keep the overlay out of the submodule's status.
+EXCL="$(git -C "$UP" rev-parse --git-path info/exclude)"
+case "$EXCL" in /*) ;; *) EXCL="$UP/$EXCL" ;; esac
+for pat in /circuits/src/clearance/ /contracts/rule-registry/ \
+           /circuits/src/test/clearance_*.rs \
+           /circuits/src/test/circuits/pack_hash_test.circom \
+           /circuits/src/test/circuits/clearance_identity_test.circom; do
+  grep -qxF "$pat" "$EXCL" 2>/dev/null || echo "$pat" >> "$EXCL"
+done
+echo "synced Clearance overlay into $UP"

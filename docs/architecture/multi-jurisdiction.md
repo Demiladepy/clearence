@@ -6,7 +6,7 @@
 the rule registry, published by that country's own licensed operator. Adding Kenya or South Africa
 takes two contract calls (`register_jurisdiction`, then `set_pack`), not a new circuit or a redeploy.
 
-## What a rule pack holds (on-chain, `contracts/rule-registry`)
+## What a rule pack holds (on-chain, [`contracts/rule-registry`](../../contracts/rule-registry/src/lib.rs))
 
 | Field | Why it differs by country |
 |---|---|
@@ -88,10 +88,12 @@ Until those are confirmed, demo packs are labelled **illustrative** in the UI an
 
 ## Live on testnet (22 Nov)
 
+Explorer: https://lab.stellar.org/r/testnet/contract/CDEXDT6BPD5XM7ASG2DQNVEJK37MX75TNSF4F27RD7LU5N7EPKVLOWCB
+
 Registry `CDEXDT6BPD5XM7ASG2DQNVEJK37MX75TNSF4F27RD7LU5N7EPKVLOWCB`: NG (566) and GH (288) registered,
 each with its own operator account and Baby JubJub operator key (generated with upstream
 `gvkey-gen`; private keys in `.secrets/`, never committed), v1 packs published (illustrative limits),
-and the NG to GH corridor open on both sides. See `deployments/testnet.json`. Re-run with
+and the NG to GH corridor open on both sides. See [`deployments/testnet.json`](../../deployments/testnet.json). Re-run with
 `python3 scripts/seed-testnet.py`.
 
 Container note: the `stellar` CLI's RPC client ignores `HTTPS_PROXY`, so in this cloud container it

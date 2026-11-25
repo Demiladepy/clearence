@@ -6,3 +6,4 @@ target/
 .claude/settings.local.json
 .secrets/
 test_snapshots/
+*.tmp

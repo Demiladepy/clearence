@@ -486,7 +486,10 @@ mod tests {
         let chain = Chain::with_people(&[&ada]);
         let ok = Payment::domestic(ng_pack(), [10 * USD, 10 * USD], 15 * USD);
         assert!(prove(&inputs(&ada, &chain, &ok)).is_ok());
-        let bad = Payment { note_owner: Some(s(0xBAD)), ..ok };
+        // Ada (KYC'd) moves notes of an unverified key K, sending the change back
+        // to K so that the only thing wrong is note ownership.
+        let k = s(0xBAD);
+        let bad = Payment { note_owner: Some(k), change_pk: Some(derive_public_key(k)), ..ok };
         assert!(prove(&inputs(&ada, &chain, &bad)).is_err());
         Ok(())
     }

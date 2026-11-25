@@ -17,8 +17,8 @@ Built on Nethermind's [Stellar Private Payments](https://github.com/NethermindEt
 | Rule registry (per-country rule packs, local-day epochs, bilateral corridors) | Live on Stellar testnet | [contract](https://lab.stellar.org/r/testnet/contract/CDEXDT6BPD5XM7ASG2DQNVEJK37MX75TNSF4F27RD7LU5N7EPKVLOWCB), [deployments/testnet.json](deployments/testnet.json), 8 contract tests |
 | Pack hash in circuit | Done | Contract, Rust and circuit reproduce the NG and GH hashes live on testnet |
 | Identity and KYC tier in circuit | Done | 6 proving tests: each tier's limits; wrong tier, wrong country, wrong secret and bad tier rejected |
-| Daily budget per person | In progress | |
-| Per-payment limit, change-to-self | Next | |
+| Per-payment limit and daily budget per person | Done (circuit) | 8 proving tests incl. two wallets sharing one budget and midnight reset; [mutation testing](docs/evidence/mutation-budget.md) |
+| Change-to-self, wiring into the transfer circuit | Next | |
 | Dual sealed records (sender and receiver operators) | Next | |
 | Pool wired to registry | Next | |
 | SDK implementation | Next (types done) | |

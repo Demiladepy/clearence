@@ -29,6 +29,7 @@ make setup      # init submodule (first time)
 make circuits   # sync + compile circuits (about 1 min)
 make test       # contract + circuit + SDK tests
 make verify     # all of the above + regenerate docs/evidence
+./scripts/mutation-test.sh  # break each budget constraint, check a test catches it (~10 min)
 ```
 
 Testnet: `python3 scripts/seed-testnet.py` (needs operator keys in `.secrets/`, never committed).
@@ -43,7 +44,8 @@ the last change.
 
 - No mocks of our own components. Use the real circuit, contract and testnet.
 - Every new circuit template: tests just under, at and just over every limit, plus a Rust or on-chain
-  parity check for every hash.
+  parity check for every hash. Passing first time is not enough: break each constraint (mutation
+  test) and confirm a test fails.
 - New Poseidon2 domain tags: 0x10 identity, 0x11 leaf, 0x12 budget nullifier, 0x13 budget commitment,
-  0x14 pack hash. Upstream uses 0x01-0x06.
+  0x14 pack hash, 0x15 budget state key. Upstream uses 0x01-0x06.
 - Never commit `.secrets/`. Never push without being asked.

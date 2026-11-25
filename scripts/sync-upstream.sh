@@ -19,9 +19,12 @@ if [ ! -f "$UP/Cargo.toml" ]; then
   git -C "$ROOT" submodule update --init upstream/nethermind-spp
 fi
 
-# 1. Revert previously applied patches, then re-apply (keeps upstream files exact).
+# 1. Restore every file our patches touch to the pinned upstream version, then
+#    apply the patches. Works even when a patch itself has changed.
 for p in "$ROOT"/upstream-patches/*.patch; do
-  git -C "$UP" apply -R --check "$p" 2>/dev/null && git -C "$UP" apply -R "$p"
+  git -C "$UP" apply --numstat "$p" | awk '{print $3}' | while read -r f; do
+    git -C "$UP" checkout -- "$f"
+  done
 done
 for p in "$ROOT"/upstream-patches/*.patch; do
   git -C "$UP" apply "$p"
@@ -42,6 +45,7 @@ rm -rf "$UP/contracts/rule-registry/target"
 EXCL="$(git -C "$UP" rev-parse --git-path info/exclude)"
 case "$EXCL" in /*) ;; *) EXCL="$UP/$EXCL" ;; esac
 for pat in /circuits/src/clearance/ /contracts/rule-registry/ \
+           /circuits/src/test/circuits/clearance_budget_test.circom \
            /circuits/src/test/clearance_*.rs \
            /circuits/src/test/circuits/pack_hash_test.circom \
            /circuits/src/test/circuits/clearance_identity_test.circom; do

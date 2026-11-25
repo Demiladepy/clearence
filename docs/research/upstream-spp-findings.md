@@ -34,8 +34,9 @@ Upstream: `NethermindEth/stellar-private-payments` @ `cd6c8fc` (2026-11-20), pin
 |---|---|
 | 0x10 | `idCommitment = H(idSecret, 0)`, `noteKey = H(idSecret, 1)` (implemented) |
 | 0x11 | allow-list leaf `H(H(idCommitment, jurisdiction, tier), issuance)` (implemented) |
-| 0x12 | `budgetNullifier = H(idSecret, epoch, seq)` |
-| 0x13 | `budgetCommitment = H(idCommitment, epoch, seq+1, newSpent, salt)` (chained, since Poseidon2 here takes ≤3 inputs) |
+| 0x12 | `budgetNullifier = H(idSecret, epoch, seq)` (implemented) |
+| 0x13 | `budgetCommitment = H(H(idCommitment, epoch, seq), spent, key)` (implemented) |
+| 0x15 | budget state key `H(idSecret, epoch, seq)`: commitment salt and encryption pad for the day total (implemented) |
 | 0x14 | `packHash` (implemented) |
 
 Checked: upstream uses only 0x01-0x06.

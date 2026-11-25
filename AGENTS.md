@@ -29,7 +29,7 @@ make setup      # init submodule (first time)
 make circuits   # sync + compile circuits (about 1 min)
 make test       # contract + circuit + SDK tests
 make verify     # all of the above + regenerate docs/evidence
-./scripts/mutation-test.sh  # break each budget constraint, check a test catches it (~10 min)
+./scripts/mutation-test.sh [budget|tx]  # break each constraint, check a test catches it (~40 min all)
 ```
 
 Testnet: `python3 scripts/seed-testnet.py` (needs operator keys in `.secrets/`, never committed).

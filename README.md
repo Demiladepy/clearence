@@ -18,8 +18,7 @@ Built on Nethermind's [Stellar Private Payments](https://github.com/NethermindEt
 | Pack hash in circuit | Done | Contract, Rust and circuit reproduce the NG and GH hashes live on testnet |
 | Identity and KYC tier in circuit | Done | 6 proving tests: each tier's limits; wrong tier, wrong country, wrong secret and bad tier rejected |
 | Per-payment limit and daily budget per person | Done (circuit) | 8 proving tests incl. two wallets sharing one budget and midnight reset; [mutation testing](docs/evidence/mutation-budget.md) |
-| Change-to-self, wiring into the transfer circuit | Next | |
-| Dual sealed records (sender and receiver operators) | Next | |
+| Payment circuit: everything above in one proof, change to self, dual sealed records, Travel Rule flag | Done (circuit) | 11 end-to-end tests with real notes and operator decryption, incl. same payment passing in NG and failing in GH, cross-border records each opened only by its own operator; [mutation testing](docs/evidence/mutation-tx.md) |
 | Pool wired to registry | Next | |
 | SDK implementation | Next (types done) | |
 

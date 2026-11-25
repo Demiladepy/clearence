@@ -86,6 +86,7 @@ template DailyBudget(levels) {
     signal output nullifier;
     signal output newCommitment;
     signal output encNewSpent;
+    signal output newSpentOut;     // for the Travel Rule flag in the parent
 
     // ---- ranges ----
     component rSent = Num2Bits(64);    rSent.in <== sent;
@@ -152,4 +153,5 @@ template DailyBudget(levels) {
     newCommitment <== next.out;
 
     encNewSpent <== newSpent + nextKey.out;
+    newSpentOut <== newSpent;
 }

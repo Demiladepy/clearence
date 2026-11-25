@@ -1,48 +1,91 @@
 #!/usr/bin/env bash
-# Mutation testing for the budget circuit: remove or weaken one constraint at a
-# time and check that the test meant to guard it fails. A mutation that
-# "survives" (all tests still pass) means a test is missing or too weak.
+# Mutation testing for Clearance circuits: remove or weaken one constraint at a
+# time and check that a test fails. A mutation that "survives" (every test
+# still passes) means a test is missing or too weak.
 #
-# Mutations are applied only to the overlay copy inside upstream/, never to our
-# sources. The overlay is restored and rebuilt at the end.
+#   ./scripts/mutation-test.sh budget    # dailyBudget.circom vs clearance_budget tests
+#   ./scripts/mutation-test.sh tx        # payment circuit vs clearance_tx tests
+#   ./scripts/mutation-test.sh           # all suites
+#
+# Mutations are applied only to the overlay copies inside upstream/, never to our
+# sources. The overlay is restored and rebuilt at the end. Writes
+# docs/evidence/mutation-<suite>.md and exits non-zero on any survivor.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 UP="$ROOT/upstream/nethermind-spp"
-F="$UP/circuits/src/clearance/dailyBudget.circom"
-OUT="$ROOT/docs/evidence/mutation-budget.md"
+SRC="$UP/circuits/src/clearance"
 
-# name | sed expression applied to dailyBudget.circom
-MUTATIONS=(
-  "no per-payment check|s/    perOk.out === 1;//"
-  "no daily check|s/    dailyOk.out === 1;//"
-  "no budget-tree membership|s/    (inTree.root - budgetRoot) \* (1 - isFirst.out) === 0;//"
-  "first payment may start above 0|s/    spent \* isFirst.out === 0;.*//"
-  "commitment ignores epoch|s/    prev.epoch <== epoch;/    prev.epoch <== 0;/"
-  "nullifier ignores seq|s/    nul.c <== seq;/    nul.c <== 0;/"
-  "no range check on sent|s/.*rSent.in <== sent;//"
-  "commitment ignores identity|s/    prev.idCommitment <== idCommitment;/    prev.idCommitment <== 0;/"
-)
+# Each entry: file | name | sed expression
+suite_budget() {
+  FILTER=clearance_budget
+  MUTATIONS=(
+    "dailyBudget.circom|no per-payment check|s/    perOk.out === 1;//"
+    "dailyBudget.circom|no daily check|s/    dailyOk.out === 1;//"
+    "dailyBudget.circom|no budget-tree membership|s/    (inTree.root - budgetRoot) \* (1 - isFirst.out) === 0;//"
+    "dailyBudget.circom|first payment may start above 0|s/    spent \* isFirst.out === 0;.*//"
+    "dailyBudget.circom|commitment ignores epoch|s/    prev.epoch <== epoch;/    prev.epoch <== 0;/"
+    "dailyBudget.circom|nullifier ignores seq|s/    nul.c <== seq;/    nul.c <== 0;/"
+    "dailyBudget.circom|no range check on sent|s/.*rSent.in <== sent;//"
+    "dailyBudget.circom|commitment ignores identity|s/    prev.idCommitment <== idCommitment;/    prev.idCommitment <== 0;/"
+  )
+}
 
-echo "| Mutation | Result | Tests that caught it |" > "$OUT.tmp"
-echo "|---|---|---|" >> "$OUT.tmp"
-for m in "${MUTATIONS[@]}"; do
-  name="${m%%|*}"; expr="${m#*|}"
-  "$ROOT/scripts/sync-upstream.sh" >/dev/null
-  sed -i "$expr" "$F"
-  if cmp -s "$F" "$ROOT/circuits/src/dailyBudget.circom"; then
-    echo "| $name | ERROR: sed did not change the circuit | |" >> "$OUT.tmp"; continue
-  fi
-  if ! make -C "$UP" circuits TESTS=1 >/dev/null 2>&1; then
-    echo "| $name | killed (does not compile) | |" >> "$OUT.tmp"; continue
-  fi
-  log=$(cd "$UP" && cargo test -q -p circuits --release clearance_budget -- --include-ignored 2>&1)
-  failed=$(echo "$log" | grep -oE "clearance_budget::tests::[a-z_0-9]+ \.\.\. FAILED|^    test::clearance_budget::tests::[a-z_0-9]+" | grep -oE "tests::[a-z_0-9]+" | sed 's/tests:://' | sort -u | paste -sd, -)
-  if [ -n "$failed" ]; then echo "| $name | killed | ${failed//,/, } |" >> "$OUT.tmp"
-  else echo "| $name | **SURVIVED** | none |" >> "$OUT.tmp"; fi
-  echo "$name: ${failed:-SURVIVED}"
-done
+suite_tx() {
+  FILTER=clearance_tx
+  MUTATIONS=(
+    "clearanceTransaction.circom|input notes need not be the sender's|s/        inPrivateKey\[i\] === keys.noteKey;//"
+    "clearanceTransaction.circom|sender pack hash unchecked|s/    sPack.out === senderPackHash;//"
+    "clearanceTransaction.circom|receiver pack hash unchecked|s/    rPack.out === receiverPackHash;//"
+    "clearanceTransaction.circom|change may go to anyone|s/    outPubkey\[1\] === core.inPublicKey\[0\];//"
+    "clearanceTransaction.circom|deposits allowed|s/    publicAmount + withdrawal === 0;//"
+    "clearanceTransaction.circom|withdrawal not counted in sent|s/    signal sent <== sumIns - outAmount\[1\];/    signal sent <== outAmount[0];/"
+    "clearanceTransaction.circom|flag uses sender threshold only|s/    signal threshold <== .*/    signal threshold <== sThreshold;/"
+    "clearanceTransaction.circom|flag always 0|s/    signal flag <== over.out;/    signal flag <== 0;/"
+    "clearanceTransaction.circom|both records sealed to sender operator|s/k == 0 ? sOperatorKey\[\([01]\)\] : rOperatorKey\[[01]\]/sOperatorKey[\1]/"
+    "clearanceTransaction.circom|record omits the amount|s/    signal recordValue <== 2 \* sent + flag;/    signal recordValue <== flag;/"
+    "clearanceTransaction.circom|record omits the receiver|s/        seal\[k\].amount <== outPubkey\[0\];/        seal[k].amount <== 0;/"
+    "clearanceTransaction.circom|limits from receiver pack|s/    id.perPayment <== sPerPayment;/    id.perPayment <== rPerPayment;/"
+    "identity.circom|identity root unchecked|s/    proof.root === identityRoot;//"
+  )
+}
 
+run_suite() {
+  local suite=$1
+  "suite_$suite"
+  local out="$ROOT/docs/evidence/mutation-$suite.md" rows="" survivors=0
+  for m in "${MUTATIONS[@]}"; do
+    IFS='|' read -r file name expr <<< "$m"
+    "$ROOT/scripts/sync-upstream.sh" >/dev/null
+    sed -i "$expr" "$SRC/$file"
+    if cmp -s "$SRC/$file" "$ROOT/circuits/src/$file"; then
+      rows+="| $name | ERROR: mutation did not apply | |"$'\n'; survivors=$((survivors+1)); echo "$name: ERROR"; continue
+    fi
+    if ! make -C "$UP" circuits TESTS=1 >/dev/null 2>&1; then
+      rows+="| $name | killed (does not compile) | |"$'\n'; echo "$name: does not compile"; continue
+    fi
+    local log failed
+    log=$(cd "$UP" && cargo test -q -p circuits --release "$FILTER" -- --include-ignored 2>&1)
+    failed=$(echo "$log" | grep -oE "^    test::$FILTER::tests::[a-z_0-9]+|$FILTER::tests::[a-z_0-9]+ \.\.\. FAILED" \
+      | grep -oE "tests::[a-z_0-9]+" | sed 's/tests:://' | sort -u | paste -sd, - | sed 's/,/, /g')
+    if [ -n "$failed" ]; then rows+="| $name | killed | $failed |"$'\n'
+    else rows+="| $name | **SURVIVED** | none |"$'\n'; survivors=$((survivors+1)); fi
+    echo "$name: ${failed:-SURVIVED}"
+  done
+  {
+    echo "# Mutation testing: $suite"
+    echo
+    echo "Generated by \`scripts/mutation-test.sh $suite\` on $(date -u +%Y-%m-%dT%H:%MZ) at \`$(git -C "$ROOT" rev-parse --short HEAD)\`."
+    echo "Each row removes or weakens one constraint; \"killed\" means at least one \`$FILTER\` test failed."
+    echo
+    echo "| Mutation | Result | Tests that caught it |"
+    echo "|---|---|---|"
+    printf "%s" "$rows"
+  } > "$out"
+  return $survivors
+}
+
+SUITES=("${@:-budget tx}")
+status=0
+for s in ${SUITES[@]}; do run_suite "$s" || status=1; done
 "$ROOT/scripts/sync-upstream.sh" >/dev/null && make -C "$UP" circuits TESTS=1 >/dev/null 2>&1
-{ echo "# Mutation testing: dailyBudget.circom"; echo; echo "Generated by \`scripts/mutation-test.sh\` on $(date -u +%Y-%m-%dT%H:%MZ) at \`$(git -C "$ROOT" rev-parse --short HEAD)\`."; echo "Each row removes or weakens one constraint; \"killed\" means at least one test failed."; echo; cat "$OUT.tmp"; } > "$OUT"
-rm "$OUT.tmp"
-! grep -q "SURVIVED\|ERROR" "$OUT"
+exit $status

@@ -30,7 +30,7 @@ r1cs() { for n in "$@"; do f="$ART/$n.r1cs"; [ -f "$f" ] || f="$ART/out/$n.r1cs"
   echo
   echo "Clearance circuits (test harness entry points):"
   echo
-  python3 "$ROOT/scripts/r1cs-info.py" $(r1cs pack_hash_test clearance_identity_test clearance_budget_test)
+  python3 "$ROOT/scripts/r1cs-info.py" $(r1cs pack_hash_test clearance_identity_test clearance_budget_test clearance_tx_2_2)
   echo
   echo "Upstream baselines we extend:"
   echo

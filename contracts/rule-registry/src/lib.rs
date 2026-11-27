@@ -103,6 +103,8 @@ enum DataKey {
     Pack(u32, u32),
     /// (from, to) -> Corridor
     Corridor(u32, u32),
+    /// Allow-list (identity tree) contract of a jurisdiction
+    AllowList(u32),
 }
 
 #[contracterror]
@@ -123,6 +125,7 @@ pub enum Error {
     Overflow = 12,
     SameJurisdiction = 13,
     BeforeEpochZero = 14,
+    NoAllowList = 15,
 }
 
 #[contractevent(topics = ["pack_changed"])]
@@ -148,6 +151,13 @@ pub struct CorridorChanged {
     pub to: u32,
     pub opened: bool,
     pub accepted: bool,
+}
+
+#[contractevent(topics = ["allow_list_changed"])]
+pub struct AllowListChanged {
+    #[topic]
+    pub jurisdiction: u32,
+    pub allow_list: Address,
 }
 
 #[contract]
@@ -287,6 +297,27 @@ impl RuleRegistry {
     }
 
     /// Domestic is always open; cross-border needs both sides.
+    // ---------- allow-lists ----------
+
+    /// The jurisdiction's admin names the contract holding its KYC allow-list
+    /// (an upstream `asp-membership` tree it administers). The pool checks
+    /// each proof's identity root against this contract.
+    pub fn set_allow_list(env: Env, jurisdiction: u32, allow_list: Address) -> Result<(), Error> {
+        jurisdiction_admin(&env, jurisdiction)?.require_auth();
+        env.storage()
+            .persistent()
+            .set(&DataKey::AllowList(jurisdiction), &allow_list);
+        AllowListChanged { jurisdiction, allow_list }.publish(&env);
+        Ok(())
+    }
+
+    pub fn allow_list(env: Env, jurisdiction: u32) -> Result<Address, Error> {
+        env.storage()
+            .persistent()
+            .get(&DataKey::AllowList(jurisdiction))
+            .ok_or(Error::NoAllowList)
+    }
+
     pub fn corridor_open(env: Env, from: u32, to: u32) -> bool {
         if from == to {
             return env.storage().persistent().has(&DataKey::JurisdictionAdmin(from));

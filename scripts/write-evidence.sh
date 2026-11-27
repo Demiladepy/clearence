@@ -32,6 +32,10 @@ r1cs() { for n in "$@"; do f="$ART/$n.r1cs"; [ -f "$f" ] || f="$ART/out/$n.r1cs"
   echo
   python3 "$ROOT/scripts/r1cs-info.py" $(r1cs pack_hash_test clearance_identity_test clearance_budget_test clearance_tx_2_2)
   echo
+  echo "## Pool cost on Soroban (measured by clearance-e2e, real proofs)"
+  echo
+  cat "$UP/target/clearance-pool-costs.md" 2>/dev/null || echo "(not measured: run make test-e2e)"
+  echo
   echo "Upstream baselines we extend:"
   echo
   python3 "$ROOT/scripts/r1cs-info.py" $(r1cs policy_tx_2_2 policy_tx_2_2_A policy_tx_2_2_A_gvk_V)

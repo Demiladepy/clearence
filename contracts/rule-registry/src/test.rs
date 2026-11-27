@@ -236,3 +236,19 @@ fn pack_hash_matches_testnet_and_circuit_golden_values() {
         dec("15352878594874501808841481184584733912846590580291801597728574576845088907239")
     );
 }
+
+#[test]
+fn each_jurisdiction_names_its_own_allow_list() {
+    let s = setup();
+    assert_eq!(s.reg.try_allow_list(&NG), Err(Ok(Error::NoAllowList)));
+    let ng_tree = Address::generate(&s.env);
+    s.reg.set_allow_list(&NG, &ng_tree);
+    // Only NG's admin authorised that call (env.auths() covers the last call).
+    let auths = s.env.auths();
+    assert_eq!(auths.len(), 1);
+    assert_eq!(auths[0].0, s.ng);
+    assert_eq!(s.reg.allow_list(&NG), ng_tree);
+    assert_eq!(s.reg.try_allow_list(&GH), Err(Ok(Error::NoAllowList)));
+    // Unknown jurisdiction
+    assert_eq!(s.reg.try_set_allow_list(&KE, &ng_tree), Err(Ok(Error::UnknownJurisdiction)));
+}

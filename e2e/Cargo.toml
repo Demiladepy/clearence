@@ -1,0 +1,31 @@
+[package]
+name = "clearance-e2e"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+# End-to-end: real Groth16 proofs of clearance_tx_2_2 verified by the real
+# verifier contract (embedding testdata/clearance_tx_2_2_vk.json via
+# VERIFIER_VK_JSON), against the real rule registry, allow-list trees, budget
+# tree, Stellar asset token and Clearance pool in the Soroban test host.
+
+[dependencies]
+anyhow = { workspace = true, features = ["std"] }
+ark-bn254 = { workspace = true }
+ark-ff = { workspace = true }
+ark-groth16 = { workspace = true }
+num-bigint = { workspace = true }
+asp-membership = { workspace = true }
+circom-groth16-verifier = { workspace = true }
+circuits = { workspace = true, features = ["std"] }
+clearance-pool = { path = "../contracts/clearance-pool" }
+contract-types = { workspace = true }
+pool-core = { workspace = true }
+rule-registry = { path = "../contracts/rule-registry" }
+soroban-sdk = { workspace = true, features = ["testutils"] }
+
+[lints]
+workspace = true

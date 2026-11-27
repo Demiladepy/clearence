@@ -9,7 +9,9 @@ Read [README.md](README.md) first. Follow the [prove-it](.claude/skills/prove-it
 |---|---|---|
 | `circuits/src/` | Clearance Circom templates (`packHash`, `identity`, ...) | Demilade |
 | `circuits/test/` | Test entry-point circuits and Rust proving tests | Demilade |
-| `contracts/rule-registry/` | Soroban contract: per-country rule packs, epochs, corridors | Demilade |
+| `contracts/rule-registry/` | Soroban contract: per-country rule packs, epochs, corridors, allow-list pointers | Demilade |
+| `contracts/clearance-pool/` | Soroban contract: the pool that verifies Clearance proofs and enforces the registry | Demilade |
+| `e2e/` | End-to-end tests: real proofs against all real contracts in the Soroban test host | Demilade |
 | `packages/sdk/` | TypeScript SDK (types are the contract with the UI) | Demilade |
 | UI | Separate, built against `packages/sdk` types | Michael |
 | `upstream/nethermind-spp/` | Nethermind SPP, git submodule pinned at `cd6c8fc`. **Do not edit.** | upstream |
@@ -27,7 +29,7 @@ edit files in this repo, never the copies under `upstream/`.
 ```bash
 make setup      # init submodule (first time)
 make circuits   # sync + compile circuits (about 1 min)
-make test       # contract + circuit + SDK tests
+make test       # contract + circuit + end-to-end + SDK tests
 make verify     # all of the above + regenerate docs/evidence
 ./scripts/mutation-test.sh [budget|tx]  # break each constraint, check a test catches it (~40 min all)
 ```

@@ -5,7 +5,7 @@
 UP := upstream/nethermind-spp
 EVIDENCE := docs/evidence
 
-.PHONY: help setup sync circuits test test-contracts test-circuits test-sdk verify evidence
+.PHONY: help setup sync circuits test test-contracts test-circuits test-e2e test-sdk verify evidence
 
 help:
 	@echo "make setup          init the pinned upstream submodule"
@@ -23,17 +23,23 @@ circuits: sync
 	$(MAKE) -C $(UP) circuits TESTS=1
 
 test-contracts: sync
-	cd $(UP) && cargo test -p rule-registry
-	cd $(UP) && cargo clippy -p rule-registry --tests -- -D warnings
+	cd $(UP) && cargo test -p rule-registry -p clearance-pool
+	cd $(UP) && cargo clippy -p rule-registry -p clearance-pool --tests -- -D warnings
 
 # Circuit tests marked #[ignore] need compiled artifacts; `make circuits` first.
 test-circuits: sync
 	cd $(UP) && cargo test -p circuits --release clearance_ -- --include-ignored
 
+# Real proofs against the real contracts. The verifier embeds the payment
+# circuit's key; proofs use the matching proving key from `make circuits`.
+test-e2e: sync
+	cd $(UP) && VERIFIER_VK_JSON=$(CURDIR)/$(UP)/testdata/clearance_tx_2_2_vk.json \
+		cargo test -p clearance-e2e --release -- --include-ignored
+
 test-sdk:
 	pnpm -C packages/sdk typecheck
 
-test: test-contracts test-circuits test-sdk
+test: test-contracts test-circuits test-e2e test-sdk
 
 verify: circuits
 	@mkdir -p $(EVIDENCE)

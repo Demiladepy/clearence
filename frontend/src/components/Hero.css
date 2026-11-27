@@ -1,0 +1,249 @@
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 48px;
+  padding-top: 40px;
+  padding-bottom: 96px;
+}
+
+.hero-copy {
+  flex: 1 1 440px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hero-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(42px, 6.4vw, 78px);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.hero-sub {
+  margin: 0;
+  font-size: 19px;
+  max-width: 520px;
+}
+
+.hero-demo {
+  margin: 0;
+  font-size: 15px;
+  max-width: 520px;
+  border-top: 1.5px solid var(--ink);
+  padding-top: 16px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px;
+}
+
+.hero-cta {
+  min-height: 56px;
+  padding: 0 28px;
+  font-size: 17px;
+}
+
+.hero-link {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.hero-trust {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ---------- layered composition ---------- */
+
+.hero-art {
+  flex: 1 1 380px;
+  min-width: 0;
+  max-width: 100%;
+  position: relative;
+  height: 580px;
+}
+
+.hero-record {
+  --r: -3deg;
+  position: absolute;
+  left: 0;
+  top: 70px;
+  width: 300px;
+  max-width: 78%;
+  background: var(--white);
+  border: 1.5px solid var(--ink);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transform: rotate(var(--r));
+  box-shadow: var(--shadow-hard);
+  animation: hero-rise 0.7s ease-out 0.1s both;
+}
+
+.hero-record-head {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero-record-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  font-size: 14px;
+  border-top: 1.5px solid var(--ink);
+  padding-top: 14px;
+}
+
+.hero-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-bar {
+  transform-origin: left center;
+  animation: hero-close 0.5s ease-out both;
+}
+
+.hero-passed {
+  color: var(--cleared);
+  font-weight: 500;
+}
+
+.hero-stamp-cleared {
+  --r: -4deg;
+  transform: rotate(var(--r));
+  animation: hero-land 0.35s ease-out 1.2s both;
+}
+
+.hero-phone {
+  --r: 2.5deg;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 250px;
+  max-width: 70%;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 30px;
+  padding: 22px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transform: rotate(var(--r));
+  box-shadow: 8px 8px 0 var(--cleared);
+  animation: hero-rise 0.7s ease-out 0.3s both;
+}
+
+.hero-phone-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero-phone-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.hero-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.hero-phone-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hero-phone-amount {
+  font-weight: 500;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.hero-ticks {
+  display: flex;
+  gap: 2px;
+  height: 22px;
+}
+
+.hero-tick {
+  flex: 1;
+  border: 1px solid var(--ink);
+}
+
+.hero-phone-foot {
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hero-phone-btn {
+  height: 44px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-stamp-held {
+  --r: -7deg;
+  position: absolute;
+  right: 24px;
+  bottom: 30px;
+  padding: 6px 16px;
+  border-width: 3px;
+  font-size: 20px;
+  background: var(--paper);
+  transform: rotate(var(--r));
+  animation: hero-land 0.35s ease-out 1.6s both;
+}
+
+/* ---------- animation ---------- */
+
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(18px) rotate(var(--r)); }
+  to   { opacity: 1; transform: translateY(0) rotate(var(--r)); }
+}
+
+@keyframes hero-close {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes hero-land {
+  from { opacity: 0; transform: scale(1.4) rotate(var(--r)); }
+  to   { opacity: 1; transform: scale(1) rotate(var(--r)); }
+}
+
+@media (max-width: 480px) {
+  .hero { padding-bottom: 64px; }
+  .hero-art { height: 540px; }
+}

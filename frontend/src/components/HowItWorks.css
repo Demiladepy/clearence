@@ -1,0 +1,55 @@
+.how {
+  padding-top: 88px;
+  padding-bottom: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.how-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+}
+
+.how-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.how-step {
+  flex: 1 1 260px;
+  min-width: 0;
+  border-top: 3px solid var(--ink);
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* first step is wider, each step sits lower than the last */
+.how-step:nth-child(1) { flex: 1.3 1 320px; }
+.how-step:nth-child(2) { margin-top: 32px; }
+.how-step:nth-child(3) { margin-top: 64px; }
+
+.how-num {
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.how-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+}
+
+.how-body { font-size: 17px; }
+
+/* stacked on small screens: no staircase */
+@media (max-width: 860px) {
+  .how-step:nth-child(2),
+  .how-step:nth-child(3) { margin-top: 0; }
+}

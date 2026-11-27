@@ -1,0 +1,141 @@
+.try {
+  padding-top: 88px;
+  padding-bottom: 88px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 56px;
+}
+
+.try-copy {
+  flex: 1 1 340px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.try-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.try-btn {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.try-btn-solid {
+  background: var(--paper);
+  color: var(--ink);
+  border: 0;
+}
+
+.try-btn-outline {
+  background: transparent;
+  color: var(--paper);
+  border: 1.5px solid var(--paper);
+}
+
+.try-reset {
+  min-height: 48px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--on-ink-muted);
+  font-weight: 500;
+  font-size: 15px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.dark a:focus-visible,
+.dark button:focus-visible {
+  outline-color: var(--cleared-on-ink);
+}
+
+/* ---------- meter card ---------- */
+
+.try-card {
+  flex: 1 1 400px;
+  min-width: 0;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 8px 8px 0 var(--cleared);
+}
+
+.try-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.try-amount {
+  font-weight: 500;
+  font-size: clamp(40px, 7vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.try-ticks {
+  display: flex;
+  gap: 3px;
+  height: 34px;
+}
+
+.try-tick {
+  flex: 1;
+  border: 1.5px solid var(--ink);
+  transition: background 0.25s ease-out;
+}
+
+.try-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.try-status {
+  min-height: 64px;
+  border-top: 1.5px solid var(--ink);
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.try-result {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.try-note { font-size: 15px; }
+.try-note-idle { color: var(--muted); }
+
+.try-stamp {
+  padding: 4px 12px;
+  font-size: 15px;
+  animation: try-land 0.3s ease-out both;
+}
+
+@keyframes try-land {
+  from { opacity: 0; transform: scale(1.4) rotate(-4deg); }
+  to   { opacity: 1; transform: scale(1) rotate(-4deg); }
+}
+
+@media (max-width: 480px) {
+  .try-card { padding: 20px; }
+  .try-result { flex-wrap: wrap; }
+}

@@ -6,7 +6,7 @@ export default function Problem() {
     <section className="band">
       <div className="container problem">
         <div className="problem-head">
-          <div className="eyebrow">§ 01 · The problem</div>
+          <div className="eyebrow">The problem</div>
           <h2 className="h2">
             Public blockchains show everything. Privacy tools hide too much.
           </h2>
@@ -14,10 +14,10 @@ export default function Problem() {
 
         <div className="problem-panels">
           <div className="problem-panel problem-public">
-            <div className="problem-label">Any public chain · sample data</div>
+            <div className="problem-label">Any public chain &middot; sample data</div>
             {publicRows.map((r, i) => (
               <div key={i} className="problem-row mono">
-                <span>{r.from} → {r.to}</span>
+                <span>{r.from} &rarr; {r.to}</span>
                 <span className="problem-amount">{r.amount}</span>
               </div>
             ))}
@@ -27,7 +27,7 @@ export default function Problem() {
           </div>
 
           <div className="problem-panel problem-private">
-            <div className="problem-label">With Clearance · same payments</div>
+            <div className="problem-label">With Clearance &middot; same payments</div>
             {publicRows.map((_, i) => (
               <div key={i} className="problem-row problem-row-private">
                 <span className="bar problem-bar" />

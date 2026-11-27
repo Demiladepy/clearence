@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import './Nav.css'
 
 export default function Nav() {
@@ -22,7 +23,7 @@ export default function Nav() {
         <a href="#how" className="nav-link">How it works</a>
         <a href="#packs" className="nav-link">Rule packs</a>
         <a href="#dev" className="nav-link">Developers</a>
-        <a href="#try" className="btn btn-primary">See it work</a>
+        <Link to="/app" className="btn btn-primary">Try the demo</Link>
       </nav>
     </header>
   )

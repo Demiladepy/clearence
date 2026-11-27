@@ -1,27 +1,14 @@
-import Nav from './components/Nav'
-import Hero from './components/Hero'
-import Problem from './components/Problem'
-import HowItWorks from './components/HowItWorks'
-import TryIt from './components/TryIt'
-import RulePacks from './components/RulePacks'
-import WhoFor from './components/WhoFor'
-import Developers from './components/Developers'
-import Footer from './components/Footer'
+import { Routes, Route } from 'react-router-dom'
+import Landing from './pages/Landing'
+import WalletPage from './pages/WalletPage'
+import OperatorPage from './pages/OperatorPage'
 
 export default function App() {
   return (
-    <>
-      <Nav />
-      <main>
-        <Hero />
-        <Problem />
-        <HowItWorks />
-        <TryIt />
-        <RulePacks />
-        <WhoFor />
-        <Developers />
-      </main>
-      <Footer />
-    </>
+    <Routes>
+      <Route path="/" element={<Landing />} />
+      <Route path="/app" element={<WalletPage />} />
+      <Route path="/operator" element={<OperatorPage />} />
+    </Routes>
   )
 }

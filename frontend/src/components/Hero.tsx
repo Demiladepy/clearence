@@ -1,8 +1,8 @@
+import { Link } from 'react-router-dom'
 import './Hero.css'
 import {
   DAILY_LIMIT,
   METER_TICKS,
-  PAYMENT_LARGE,
   PAYMENT_SMALL,
   formatNaira,
 } from '../data/content'
@@ -14,26 +14,20 @@ export default function Hero() {
   return (
     <section id="top" className="container hero">
       <div className="hero-copy">
-        <div className="eyebrow">Stellar Buildathon · Nigeria and Ghana 2026</div>
+        <div className="eyebrow">Stellar Buildathon 2026</div>
         <h1 className="hero-title">Private payments that follow the rules.</h1>
         <p className="hero-sub">
-                   Add compliant private payments to your existing app on Stellar.
-          Clearance proves each payment stayed within the law, without showing
-          who paid whom or how much.
-        </p>
-        <p className="hero-demo mono">
-          Send ₦{formatNaira(PAYMENT_SMALL)} privately. Try ₦
-          {formatNaira(PAYMENT_LARGE)} more and it is not sent at the ₦
-          {formatNaira(DAILY_LIMIT)} Tier 1 limit.
+          Add compliant private payments to your app on Stellar. Every payment
+          is proven to follow the rules, without showing who paid whom or how
+          much.
         </p>
         <div className="hero-actions">
-          <a href="#try" className="btn btn-primary hero-cta">See it work</a>
+          <Link to="/app" className="btn btn-primary hero-cta">Try the demo</Link>
           <a href="#dev" className="hero-link">Read the docs</a>
         </div>
         <div className="hero-trust">
-                    Confidential, not anonymous: every payment goes through a licensed
-          operator. Built on Stellar Private Payments by Nethermind. Runs on
-          Stellar testnet.
+          Confidential, not anonymous. Built on Stellar Private Payments by
+          Nethermind. Testnet only.
         </div>
       </div>
 
@@ -68,12 +62,12 @@ export default function Hero() {
 
         <div className="hero-phone">
           <div className="hero-phone-top">
-            <span className="hero-phone-brand">Clearance</span>
-            <span className="hero-pill">Tier 1 · NGN</span>
+            <span className="hero-phone-brand">Marigold</span>
+            <span className="hero-pill">Tier 1 &middot; NGN</span>
           </div>
           <div className="hero-phone-label">Left today</div>
           <div className="hero-phone-amount mono">
-            ₦{formatNaira(DAILY_LIMIT - PAYMENT_SMALL)}
+            &#8358;{formatNaira(DAILY_LIMIT - PAYMENT_SMALL)}
           </div>
           <div className="hero-ticks">
             {ticks.map((on, i) => (
@@ -85,13 +79,13 @@ export default function Hero() {
             ))}
           </div>
           <div className="hero-phone-foot mono">
-            <span>Spent ₦{formatNaira(PAYMENT_SMALL)}</span>
-            <span>of ₦{formatNaira(DAILY_LIMIT)}</span>
+            <span>Spent &#8358;{formatNaira(PAYMENT_SMALL)}</span>
+            <span>of &#8358;{formatNaira(DAILY_LIMIT)}</span>
           </div>
           <div className="hero-phone-btn">Send privately</div>
         </div>
 
-<span className="stamp stamp-held hero-stamp-held">NOT SENT</span>
+        <span className="stamp stamp-held hero-stamp-held">NOT SENT</span>
       </div>
     </section>
   )

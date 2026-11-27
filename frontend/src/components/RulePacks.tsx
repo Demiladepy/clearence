@@ -9,11 +9,11 @@ export default function RulePacks() {
   return (
     <section id="packs" className="container packs">
       <div className="packs-copy">
-        <div className="eyebrow">§ 04 · Rule packs</div>
+        <div className="eyebrow">Rule packs</div>
         <h2 className="h2">Change the rule. Every payment follows.</h2>
         <p className="packs-text">
-          A rule pack is a small settings file with your tier limits. Publish
-          a new version and the same payment is judged by the new rules.
+          A rule pack holds your tier limits. Publish a new version and it
+          applies at once.
         </p>
         <div className="packs-toggle">
           {rulePacks.map((p) => {

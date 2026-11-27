@@ -4,7 +4,7 @@ const steps = [
   {
     n: '01',
     title: 'Your provider verifies you',
-    body: 'After identity checks, your app gives you a private credential that says your tier.',
+    body: 'After an identity check, you get a private credential for your tier.',
   },
   {
     n: '02',
@@ -13,16 +13,16 @@ const steps = [
   },
   {
     n: '03',
-    title: 'The regulator sees the proof',
-    body: 'Every payment carries a sealed record that only your licensed operator can open. Everyone else sees that a valid payment happened.',
-},
+    title: 'Only the operator can open it',
+    body: 'Every payment carries a sealed record. Everyone else just sees a valid payment.',
+  },
 ]
 
 export default function HowItWorks() {
   return (
     <section id="how" className="container how">
       <div className="how-head">
-        <div className="eyebrow">§ 02 · How it works</div>
+        <div className="eyebrow">How it works</div>
         <h2 className="h2">Regulators already wrote the rules. We enforce them.</h2>
       </div>
 

@@ -5,13 +5,15 @@
 UP := upstream/nethermind-spp
 EVIDENCE := docs/evidence
 
-.PHONY: help setup sync circuits test test-contracts test-circuits test-e2e test-sdk verify evidence
+.PHONY: help setup sync circuits wasm deploy-testnet test test-contracts test-circuits test-e2e test-sdk verify evidence
 
 help:
 	@echo "make setup          init the pinned upstream submodule"
 	@echo "make circuits       sync + compile all circuits (incl. test circuits)"
 	@echo "make test           contract + circuit + SDK tests"
 	@echo "make verify         full rebuild + all tests + write docs/evidence/"
+	@echo "make wasm           build the four contract WASMs (verifier embeds clearance_tx_2_2's key)"
+	@echo "make deploy-testnet wasm + deploy everything to testnet (scripts/deploy-testnet.py)"
 
 setup:
 	git submodule update --init $(UP)
@@ -25,6 +27,16 @@ circuits: sync
 test-contracts: sync
 	cd $(UP) && cargo test -p rule-registry -p clearance-pool
 	cd $(UP) && cargo clippy -p rule-registry -p clearance-pool --tests -- -D warnings
+
+wasm: sync
+	cd $(UP) && stellar contract build --package rule-registry
+	cd $(UP) && stellar contract build --package asp-membership
+	cd $(UP) && stellar contract build --package clearance-pool
+	cd $(UP) && VERIFIER_VK_JSON=$(CURDIR)/$(UP)/testdata/clearance_tx_2_2_vk.json \
+		stellar contract build --package circom-groth16-verifier
+
+deploy-testnet: wasm
+	python3 scripts/deploy-testnet.py
 
 # Circuit tests marked #[ignore] need compiled artifacts; `make circuits` first.
 test-circuits: sync

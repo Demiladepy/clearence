@@ -7,8 +7,10 @@ use clearance_pool::Error;
 use soroban_sdk::{Address, testutils::{Address as _, Ledger as _}};
 use std::fmt::Write as _;
 
-/// Soroban's per-transaction CPU instruction limit (network config, Nov 2026).
-const TX_INSTRUCTION_LIMIT: i64 = 100_000_000;
+/// Testnet per-transaction limits, read with `stellar network settings` on
+/// 27 Nov 2026 (contract_compute_v0.tx_max_instructions, tx_memory_limit).
+const TX_INSTRUCTION_LIMIT: i64 = 400_000_000;
+const TX_MEMORY_LIMIT: i64 = 41_943_040;
 
 #[test]
 #[ignore = "needs `make circuits` artifacts and the clearance_tx_2_2 proving key"]
@@ -28,6 +30,7 @@ fn nigeria_to_ghana_end_to_end() -> Result<()> {
     assert_eq!(open_record(&r.record, 0, d_ng()).2, 0);
     writeln!(costs, "| deposit 25 USD (NG) | {} | {} |", r.instructions, r.mem_bytes)?;
     assert!(r.instructions < TX_INSTRUCTION_LIMIT, "deposit: {} instructions", r.instructions);
+    assert!(r.mem_bytes < TX_MEMORY_LIMIT, "deposit: {} bytes", r.mem_bytes);
 
     // 2. Ada pays Bob 15 USD inside Nigeria. NG's operator opens the record.
     let p = w.payment(&ada, &[note], (bob.receive_key(), 15 * USD), 0, 0, &ng_pack(), &ada.account);
@@ -162,7 +165,7 @@ fn write_costs(rows: &str) -> Result<()> {
     std::fs::write(
         &out,
         format!(
-            "| Call | CPU instructions | Memory bytes |\n|---|---:|---:|\n{rows}\nSoroban per-transaction limit: {TX_INSTRUCTION_LIMIT} instructions.\n"
+            "| Call | CPU instructions | Memory bytes |\n|---|---:|---:|\n{rows}\nTestnet per-transaction limits (stellar network settings, 27 Nov 2026): {TX_INSTRUCTION_LIMIT} instructions, {TX_MEMORY_LIMIT} bytes memory.\n"
         ),
     )?;
     Ok(())

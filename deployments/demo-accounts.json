@@ -1,0 +1,62 @@
+{
+  "ranAt": "2026-11-27T15:01:04.470Z",
+  "accounts": [
+    {
+      "name": "Ada (demo)",
+      "jurisdiction": "NG",
+      "stellarAddress": "GAW66MEJJNB5NTAGMJG6X4AXZYL6H2CUAYLFHIRKTT7FIZM4DPXXU6XH",
+      "clearanceAddress": "clr:9913087533184529592469243143663795238890786136124557876375230318463487382182:132ae0649187867e7283077f415e55571e75f5680b03ee4a95024c5b6c49fd4d",
+      "tier": 1,
+      "publicClrusd": 180,
+      "privateBalanceUsd": 20,
+      "budget": {
+        "tier": 1,
+        "spentTodayUsd": 0,
+        "dailyLimitUsd": 31.25,
+        "perPaymentLimitUsd": 18.75,
+        "resetsAt": "2026-11-27T23:00:00.000Z"
+      },
+      "steps": {
+        "trustline": {
+          "tx": "26377c105b7c69692d4145faf49e63493e458ef64ea53532ce7a5b6367bacdf5",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/26377c105b7c69692d4145faf49e63493e458ef64ea53532ce7a5b6367bacdf5"
+        },
+        "kyc": {
+          "tx": "6852d19c206bf4ea0c81686a6743ec5a434449a9c776c0162539383351616ea7",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/6852d19c206bf4ea0c81686a6743ec5a434449a9c776c0162539383351616ea7"
+        },
+        "deposit20": {
+          "tx": "7f12a9bc5fa3c821a1e0c3dedc97de26073cbbe37fd47f434a7aba9f510636c3",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/7f12a9bc5fa3c821a1e0c3dedc97de26073cbbe37fd47f434a7aba9f510636c3",
+          "provingMs": 6722
+        }
+      }
+    },
+    {
+      "name": "Kofi (demo)",
+      "jurisdiction": "GH",
+      "stellarAddress": "GAMZFEK5HRKJMAMJO244ROOE3MFNLYR5GS357E4ZVPBXYUFK2NL37GLC",
+      "clearanceAddress": "clr:7600875842942481122511770653523116744408533769051511824914663485847463305137:71e76be3cf81c4fb004a398ce4e5549968e033013f1d11b6b15a13d5561fae0c",
+      "tier": 1,
+      "publicClrusd": 20,
+      "privateBalanceUsd": 0,
+      "budget": {
+        "tier": 1,
+        "spentTodayUsd": 0,
+        "dailyLimitUsd": 25,
+        "perPaymentLimitUsd": 15,
+        "resetsAt": "2026-11-28T00:00:00.000Z"
+      },
+      "steps": {
+        "trustline": {
+          "tx": "7f08af18b54ae8dcd987946e1d753effbef2ccb19e07c3f49fada517deff8494",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/7f08af18b54ae8dcd987946e1d753effbef2ccb19e07c3f49fada517deff8494"
+        },
+        "kyc": {
+          "tx": "aad3e692e4160ec69e3699650e81f7ec24fdcf763e84aa787cacbf299d787693",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/aad3e692e4160ec69e3699650e81f7ec24fdcf763e84aa787cacbf299d787693"
+        }
+      }
+    }
+  ]
+}

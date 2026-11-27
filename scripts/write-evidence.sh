@@ -73,6 +73,15 @@ if os.path.exists(nu):
     print(f"**Brand-new user** ({r['ranAt']}): trustline [{r['trustlineTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['trustlineTx']}), "
           f"KYC [{r['kycTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['kycTx']}), "
           f"first deposit [{r['depositTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['depositTx']}) ({r['provingMs']} ms proving).\n")
+da = f"{d}/demo-accounts.json"
+if os.path.exists(da):
+    r = json.load(open(da))
+    print(f"**Frontend demo accounts** ({r['ranAt']}, `make demo-accounts`):\n")
+    print("| Account | Stellar | Tier | Public CLRUSD | Private | Transactions |\n|---|---|---|---:|---:|---|")
+    for a in r["accounts"]:
+        txs = ", ".join(f"[{k}](https://stellar.expert/explorer/testnet/tx/{v['tx']})" for k, v in a["steps"].items())
+        print(f"| {a['name']} ({a['jurisdiction']}) | [{a['stellarAddress'][:6]}...](https://stellar.expert/explorer/testnet/account/{a['stellarAddress']}) | {a['tier']} | {a['publicClrusd']} | {a['privateBalanceUsd']} | {txs} |")
+    print()
 PY
   echo
   echo "Upstream baselines we extend:"

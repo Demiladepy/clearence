@@ -25,6 +25,7 @@ clearance-pool = { path = "../contracts/clearance-pool" }
 contract-types = { workspace = true }
 pool-core = { workspace = true }
 rule-registry = { path = "../contracts/rule-registry" }
+serde_json = { workspace = true, features = ["std"] }
 soroban-sdk = { workspace = true, features = ["testutils"] }
 
 [lints]

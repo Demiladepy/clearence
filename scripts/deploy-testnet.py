@@ -65,6 +65,7 @@ for w in ["rule_registry.wasm", "asp_membership.wasm", "circom_groth16_verifier.
         raise SystemExit(f"missing {WASM / w}: run `make wasm`")
 
 admin = addr("clr-admin")
+start_ledger = json.loads(sh("stellar", "ledger", "latest", "--network", NET, "--output", "json"))["sequence"]
 
 # token
 asset = f"CLRUSD:{admin}"
@@ -123,6 +124,7 @@ out = {
     "network": "testnet",
     "networkPassphrase": "Test SDF Network ; September 2015",
     "deployedAt": time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime()),
+    "startLedger": start_ledger,
     "token": {"contract": token, "asset": asset, "note": "CLRUSD is a test token issued by clr-admin, not USDC"},
     "ruleRegistry": registry,
     "verifier": verifier,

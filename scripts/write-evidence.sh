@@ -36,6 +36,20 @@ r1cs() { for n in "$@"; do f="$ART/$n.r1cs"; [ -f "$f" ] || f="$ART/out/$n.r1cs"
   echo
   cat "$UP/target/clearance-pool-costs.md" 2>/dev/null || echo "(not measured: run make test-e2e)"
   echo
+  echo "## Live on Stellar testnet (\`make testnet-demo\`)"
+  echo
+  python3 - "$ROOT/deployments/testnet-demo.json" <<'PY' || echo "(no testnet run recorded)"
+import json, sys
+d = json.load(open(sys.argv[1]))
+print(f"Pool `{d['pool']}`. Ada's day total read back from chain events: {d['adaSpentTodayUsd']} USD.")
+print()
+print("| Step | Transaction | Native proving | Fee (stroops) | Records opened by operators |")
+print("|---|---|---:|---:|---|")
+for s in d["steps"]:
+    ops = "; ".join(f"record {o['record']}: {o['sent_usd']} USD, flag {o['travel_rule_flag']}" for o in s["opened_by_operators"])
+    print(f"| {s['step']} | [{s['tx'][:10]}...]({s['explorer']}) | {s['proving_ms']} ms | {s.get('fee_charged_stroops') or 'n/a'} | {ops} |")
+PY
+  echo
   echo "Upstream baselines we extend:"
   echo
   python3 "$ROOT/scripts/r1cs-info.py" $(r1cs policy_tx_2_2 policy_tx_2_2_A policy_tx_2_2_A_gvk_V)

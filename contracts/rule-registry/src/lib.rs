@@ -296,7 +296,6 @@ impl RuleRegistry {
         })
     }
 
-    /// Domestic is always open; cross-border needs both sides.
     // ---------- allow-lists ----------
 
     /// The jurisdiction's admin names the contract holding its KYC allow-list
@@ -318,6 +317,7 @@ impl RuleRegistry {
             .ok_or(Error::NoAllowList)
     }
 
+    /// Domestic is always open; cross-border needs both sides.
     pub fn corridor_open(env: Env, from: u32, to: u32) -> bool {
         if from == to {
             return env.storage().persistent().has(&DataKey::JurisdictionAdmin(from));

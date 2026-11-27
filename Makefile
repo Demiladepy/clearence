@@ -5,7 +5,7 @@
 UP := upstream/nethermind-spp
 EVIDENCE := docs/evidence
 
-.PHONY: help setup sync circuits wasm deploy-testnet test test-contracts test-circuits test-e2e test-sdk verify evidence
+.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo test test-contracts test-circuits test-e2e test-sdk verify evidence
 
 help:
 	@echo "make setup          init the pinned upstream submodule"
@@ -46,7 +46,13 @@ test-circuits: sync
 # circuit's key; proofs use the matching proving key from `make circuits`.
 test-e2e: sync
 	cd $(UP) && VERIFIER_VK_JSON=$(CURDIR)/$(UP)/testdata/clearance_tx_2_2_vk.json \
-		cargo test -p clearance-e2e --release -- --include-ignored
+		cargo test -p clearance-e2e --release -- --include-ignored --skip testnet_demo
+
+# Real payments on Stellar testnet against deployments/testnet.json (needs a
+# fresh pool from `make deploy-testnet`). Writes deployments/testnet-demo.json.
+testnet-demo: sync
+	cd $(UP) && CLEARANCE_TESTNET=1 VERIFIER_VK_JSON=$(CURDIR)/$(UP)/testdata/clearance_tx_2_2_vk.json \
+		cargo test -p clearance-e2e --release testnet_demo -- --include-ignored --nocapture
 
 test-sdk:
 	pnpm -C packages/sdk typecheck

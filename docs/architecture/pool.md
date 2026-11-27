@@ -1,6 +1,7 @@
 # The Clearance pool
 
-Status: contract implemented; end-to-end tests with real proofs in `e2e/` (27 Nov).
+Status: live on Stellar testnet (27 Nov); ids in [`deployments/testnet.json`](../../deployments/testnet.json),
+real payments in [`deployments/testnet-demo.json`](../../deployments/testnet-demo.json).
 
 Contract: [`contracts/clearance-pool`](../../contracts/clearance-pool/src/lib.rs).
 Tests: [`e2e/src/tests/pool.rs`](../../e2e/src/tests/pool.rs), harness [`world.rs`](../../e2e/src/tests/world.rs).
@@ -48,3 +49,21 @@ tokens, emit `new_commitment_event` x2, `new_nullifier_event` x2, `budget_step`,
   the root history (90 roots) lets a proof made against a slightly old root still land.
 - **Allow-lists are per country** and found through the registry, so onboarding Kenya is a
   registry call plus a tree deployment, not a pool change.
+
+## Cost (measured)
+
+- Soroban host, real proofs: about 91M CPU instructions and 2.2 MB memory per call, against
+  testnet limits of 400M and 40 MiB (read with `stellar network settings`, 27 Nov).
+- Testnet fee charged: about 1.21 XLM per call (includes rent for new entries).
+- Native proving (4 vCPU): about 2.2 s per payment after the proving key is loaded.
+
+## Running it
+
+```bash
+make deploy-testnet   # build WASMs, deploy everything, write deployments/testnet.json
+make testnet-demo     # 4 real payments; rebuilds all state from chain events first
+```
+
+`make testnet-demo` can be re-run on the same deployment: each run uses fresh demo identities and
+rebuilds note, budget and allow-list state from the contracts' events, checking every root against
+the chain.

@@ -149,7 +149,7 @@ fn the_pool_enforces_what_the_circuit_cannot() -> Result<()> {
     use circuits::test::utils::{general::scalar_to_bigint as b, merkle_tree as mt};
     let eve = w.unlisted(66, NG, 1, 100);
     let mut p = w.payment(&eve, &[], (eve.receive_key(), 0), 5 * USD, 0, &ng_pack(), &eve.account);
-    let mut forged = w.id_leaves[0].1.clone();
+    let mut forged = w.m.id_leaves[0].1.clone();
     forged.push(tier_leaf(eve.id, NG, 1));
     let (path, bits) = mt::merkle_proof_padded(&forged, forged.len() - 1, ID_LEVELS as usize);
     p.inputs.set("identityRoot", b(mt::merkle_root_padded(&forged, ID_LEVELS as usize)));

@@ -1,62 +1,97 @@
 make[1]: Entering directory '/home/user/clearence'
 ./scripts/sync-upstream.sh
 synced Clearance overlay into /home/user/clearence/upstream/nethermind-spp
-cd upstream/nethermind-spp && cargo test -p rule-registry
+cd upstream/nethermind-spp && cargo test -p rule-registry -p clearance-pool
+   Compiling pool-core v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/pool-core)
    Compiling rule-registry v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/rule-registry)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 35.77s
+   Compiling clearance-pool v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/clearance-pool)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.66s
+     Running unittests src/lib.rs (target/debug/deps/clearance_pool-6e219ee838ef9140)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
      Running unittests src/lib.rs (target/debug/deps/rule_registry-fe39deaf36d7f4fd)
 
-running 8 tests
+running 9 tests
+test test::each_jurisdiction_names_its_own_allow_list ... ok
 test test::corridors_need_both_sides ... ok
-test test::only_the_jurisdictions_own_admin_can_set_its_pack ... ok
 test test::epoch_rolls_at_local_midnight ... ok
+test test::onboards_kenya_and_south_africa_without_code_changes ... ok
+test test::only_the_jurisdictions_own_admin_can_set_its_pack ... ok
 test test::hash_is_bound_to_jurisdiction_and_every_value ... ok
 test test::rejects_bad_packs ... ok
 test test::pack_hash_matches_testnet_and_circuit_golden_values ... ok
-test test::onboards_kenya_and_south_africa_without_code_changes ... ok
 test test::publishes_versioned_packs_and_tracks_active ... ok
 
-test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
 
-cd upstream/nethermind-spp && cargo clippy -p rule-registry --tests -- -D warnings
+cd upstream/nethermind-spp && cargo clippy -p rule-registry -p clearance-pool --tests -- -D warnings
+    Checking contract-types v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/types)
+    Checking soroban-utils v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/soroban-utils)
+    Checking pool-core v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/pool-core)
     Checking rule-registry v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/rule-registry)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.46s
+    Checking clearance-pool v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/clearance-pool)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.71s
 cd upstream/nethermind-spp && cargo test -p circuits --release clearance_ -- --include-ignored
    Compiling circuits v0.1.0 (/home/user/clearence/upstream/nethermind-spp/circuits)
-    Finished `release` profile [optimized] target(s) in 33.61s
+    Finished `release` profile [optimized] target(s) in 28.73s
      Running unittests src/lib.rs (target/release/deps/circuits-6a0672e1ad5022ad)
 
-running 28 tests
+running 29 tests
 test test::clearance_budget::tests::first_payment_of_the_day_starts_from_zero ... ok
 test test::clearance_budget::tests::another_persons_state_cannot_be_used ... ok
 test test::clearance_budget::tests::out_of_range_amounts_fail ... ok
-test test::clearance_budget::tests::daily_budget_under_at_over_across_payments ... ok
 test test::clearance_budget::tests::outputs_match_the_rust_reference ... ok
 test test::clearance_budget::tests::budget_resets_at_the_next_local_day_and_old_state_is_useless ... ok
+test test::clearance_budget::tests::daily_budget_under_at_over_across_payments ... ok
 test test::clearance_identity::tests::cannot_claim_a_higher_tier_than_issued ... ok
-test test::clearance_identity::tests::ghana_kyc_does_not_prove_under_nigeria ... ok
 test test::clearance_budget::tests::per_payment_limit_under_at_over ... ok
-test test::clearance_identity::tests::someone_elses_secret_fails ... ok
 test test::clearance_budget::tests::second_wallet_shares_the_budget ... ok
-test test::clearance_identity::tests::tier_outside_1_to_3_fails_even_if_issued ... ok
 test test::clearance_identity::tests::reissued_leaf_after_revocation_is_distinct ... ok
-test test::clearance_identity::tests::each_tier_gets_its_own_limits ... ok
+test test::clearance_identity::tests::ghana_kyc_does_not_prove_under_nigeria ... ok
+test test::clearance_identity::tests::someone_elses_secret_fails ... ok
+test test::clearance_identity::tests::tier_outside_1_to_3_fails_even_if_issued ... ok
 test test::clearance_pack_hash::tests::pack_hash_reference_matches_testnet_registry ... ok
+test test::clearance_identity::tests::each_tier_gets_its_own_limits ... ok
 test test::clearance_pack_hash::tests::pack_hash_circuit_rejects_a_changed_limit ... ok
 test test::clearance_pack_hash::tests::pack_hash_circuit_matches_testnet_registry ... ok
-test test::clearance_tx::tests::cross_border_uses_the_senders_limits ... ok
+test test::clearance_tx::tests::change_must_return_to_the_sender ... ok
 test test::clearance_tx::tests::cross_border_each_operator_opens_only_its_own_record ... ok
 test test::clearance_tx::tests::cannot_spend_notes_of_another_key_under_my_identity ... ok
-test test::clearance_tx::tests::change_must_return_to_the_sender ... ok
-test test::clearance_tx::tests::person_not_on_the_allow_list_cannot_pay ... ok
+test test::clearance_tx::tests::cross_border_uses_the_senders_limits ... ok
 test test::clearance_tx::tests::domestic_nigeria_payment_and_operator_opens_the_record ... ok
 test test::clearance_tx::tests::pack_values_must_match_the_published_hash ... ok
-test test::clearance_tx::tests::withdrawals_count_and_deposits_are_rejected ... ok
-test test::clearance_tx::tests::same_payment_passes_in_nigeria_and_fails_in_ghana ... ok
+test test::clearance_tx::tests::deposits_fund_your_own_balance_and_count_only_what_you_pay ... ok
+test test::clearance_tx::tests::person_not_on_the_allow_list_cannot_pay ... ok
 test test::clearance_tx::tests::daily_budget_holds_across_payments_in_the_full_circuit ... ok
+test test::clearance_tx::tests::withdrawals_count_towards_limits ... ok
+test test::clearance_tx::tests::same_payment_passes_in_nigeria_and_fails_in_ghana ... ok
 test test::clearance_tx::tests::travel_rule_flag_uses_the_stricter_threshold ... ok
 
-test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 105 filtered out; finished in 18.93s
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 105 filtered out; finished in 18.51s
+
+cd upstream/nethermind-spp && VERIFIER_VK_JSON=/home/user/clearence/upstream/nethermind-spp/testdata/clearance_tx_2_2_vk.json \
+	cargo test -p clearance-e2e --release -- --include-ignored --skip testnet_demo
+   Compiling clearance-pool v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/clearance-pool)
+   Compiling circuits v0.1.0 (/home/user/clearence/upstream/nethermind-spp/circuits)
+   Compiling rule-registry v0.1.0 (/home/user/clearence/upstream/nethermind-spp/contracts/rule-registry)
+   Compiling clearance-e2e v0.1.0 (/home/user/clearence/upstream/nethermind-spp/clearance-e2e)
+    Finished `release` profile [optimized] target(s) in 40.80s
+     Running unittests src/lib.rs (target/release/deps/clearance_e2e-518165d5961f0c62)
+
+running 2 tests
+test tests::pool::nigeria_to_ghana_end_to_end ... ok
+test tests::pool::the_pool_enforces_what_the_circuit_cannot ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 23.41s
+
+   Doc-tests clearance_e2e
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
 pnpm -C packages/sdk typecheck
 

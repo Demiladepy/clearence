@@ -1,16 +1,58 @@
 {
   "network": "testnet",
   "networkPassphrase": "Test SDF Network ; September 2015",
-  "ruleRegistry": "CDEXDT6BPD5XM7ASG2DQNVEJK37MX75TNSF4F27RD7LU5N7EPKVLOWCB",
-  "deployTx": "7a150b71eae485498dc06ca49ce0b88835da9671b87bac937714e531e7352534",
+  "deployedAt": "2026-11-27T13:05Z",
+  "token": {
+    "contract": "CCXZ5OWSDPXDGL7CAN7CDYVATYPSHXDTRZAWQLWGT3I4QZ62F3MRIRZ3",
+    "asset": "CLRUSD:GB5HAJ2FBMUR6NMQG7EH2A4OFA5F7K4ZIIKW6OTMWZDIA66ROL4QIBZJ",
+    "note": "CLRUSD is a test token issued by clr-admin, not USDC"
+  },
+  "ruleRegistry": "CAA62XQJRNFBMAATZX7KQX7K66BJZCPUJXMPSCE4ZRXELFC3KCAPFEQV",
+  "verifier": "CBIC3N3XOCNUTLRLL6NE2M5MBZAPQRLIUUPVO55YJOMPTIHLNW2WACGD",
+  "verifierKey": "testdata/clearance_tx_2_2_vk.json (dev key from circuit-compiler, not a ceremony)",
+  "pool": "CA2DGBLA6H2Q6W4JOHOT2UGXEWIJVQSNFDB2GN3PQSZRUNEBDNJOTIQE",
+  "budgetTree": "CDRYYKQUNECSBG2SCBCJTILGLEKFO2UQF7EG7VDYYZ3SDCJ2MMIP5EVX",
   "accounts": {
     "registryAdmin": "GB5HAJ2FBMUR6NMQG7EH2A4OFA5F7K4ZIIKW6OTMWZDIA66ROL4QIBZJ",
     "operatorNG": "GDVGM6TDBDSVUUPNDAMFJ75EASQE6334SPN4CB56UZCHQRUYCYOGHO56",
     "operatorGH": "GBAUHAITOZEFV6ZUFLQ5WBGRZYQ6SBB6FOSIPCHMCL5HJ66UFYBXH5PR"
   },
   "jurisdictions": {
-    "566": { "name": "Nigeria", "packVersion": 1, "packHash": "793274114535773168330462619525225772468182337604504132993004277258700724562", "illustrative": true },
-    "288": { "name": "Ghana", "packVersion": 1, "packHash": "15352878594874501808841481184584733912846590580291801597728574576845088907239", "illustrative": true }
+    "566": {
+      "name": "Nigeria",
+      "packVersion": 1,
+      "packHash": "793274114535773168330462619525225772468182337604504132993004277258700724562",
+      "allowList": "CBSHEYVFWZMKK5Z2CM6EW4I6J6V5QVRE6ZB2E5CJJFDSREN2WIAU5HJW",
+      "epochAtDeploy": 20784,
+      "illustrative": true
+    },
+    "288": {
+      "name": "Ghana",
+      "packVersion": 1,
+      "packHash": "15352878594874501808841481184584733912846590580291801597728574576845088907239",
+      "allowList": "CBXRDXDHO3YG3FICOWQDMUOR3XJDS47KVJO7EONURBTS2AS7A3ZRP5QA",
+      "epochAtDeploy": 20784,
+      "illustrative": true
+    }
   },
-  "corridors": [{ "from": 566, "to": 288, "open": true }]
+  "corridors": [
+    {
+      "from": 566,
+      "to": 288,
+      "open": true
+    }
+  ],
+  "history": [
+    {
+      "ruleRegistry": "CDEXDT6BPD5XM7ASG2DQNVEJK37MX75TNSF4F27RD7LU5N7EPKVLOWCB",
+      "deployTx": "7a150b71eae485498dc06ca49ce0b88835da9671b87bac937714e531e7352534",
+      "note": "registry v1 (22 Nov), before allow-list pointers"
+    },
+    {
+      "ruleRegistry": "CC2MLFEQXXU7IC5WKODL7PLVEXG5B4RQARRRI7QKMT42CBBFZHPHY6RE",
+      "deployTx": null,
+      "note": "registry v1 (22 Nov), before allow-list pointers"
+    }
+  ],
+  "startLedger": 5951900
 }

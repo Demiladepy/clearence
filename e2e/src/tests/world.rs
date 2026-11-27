@@ -220,6 +220,21 @@ pub struct OwnedNote {
 
 // ---------------- the world ----------------
 
+/// Off-chain state a wallet keeps, rebuilt from chain events, and the proof
+/// builder. Shared by the in-host `World` and the testnet driver.
+pub struct Mirror {
+    pub env: Env,
+    pub pool: Address,
+    pub token: Address,
+    pub notes: Vec<Scalar>,
+    pub budget_leaves: Vec<Scalar>,
+    pub budget_steps: Vec<(Scalar, Scalar, Scalar)>,
+    pub id_leaves: [(u32, Vec<Scalar>); 2],
+    /// The packs published for NG and GH (sender pack is taken from here).
+    pub packs: [Pack; 2],
+    salt: u64,
+}
+
 pub struct World {
     pub env: Env,
     pub token: Address,
@@ -227,12 +242,7 @@ pub struct World {
     pub pool: ClearancePoolClient<'static>,
     pub budget_tree: ASPMembershipClient<'static>,
     pub allow_lists: [(u32, ASPMembershipClient<'static>); 2],
-    // mirrors, rebuilt from events
-    pub notes: Vec<Scalar>,
-    pub budget_leaves: Vec<Scalar>,
-    pub budget_steps: Vec<(Scalar, Scalar, Scalar)>,
-    pub id_leaves: [(u32, Vec<Scalar>); 2],
-    salt: u64,
+    pub m: Mirror,
 }
 
 impl World {
@@ -284,24 +294,8 @@ impl World {
         let budget_tree = tree(&pool.address, BUDGET_LEVELS);
         pool.set_budget_tree(&budget_tree.address);
 
-        Self {
-            registry,
-            pool,
-            budget_tree,
-            allow_lists: [(NG, ng_list), (GH, gh_list)],
-            env,
-            token,
-            notes: Vec::new(),
-            budget_leaves: Vec::new(),
-            budget_steps: Vec::new(),
-            id_leaves: [(NG, Vec::new()), (GH, Vec::new())],
-            salt: 1,
-        }
-    }
-
-    fn fresh(&mut self) -> Scalar {
-        self.salt += 1;
-        s(0xB11D_0000 + self.salt)
+        let m = Mirror::new(&env, pool.address.clone(), token.clone(), 1);
+        Self { registry, pool, budget_tree, allow_lists: [(NG, ng_list), (GH, gh_list)], env, token, m }
     }
 
     /// The operator of `p.jurisdiction` KYCs `p` at `p.tier`.
@@ -310,10 +304,10 @@ impl World {
         let leaf = tier_leaf(p.id, jurisdiction, tier);
         let k = usize::from(jurisdiction == GH);
         self.allow_lists[k].1.insert_leaf(&to_u256(&self.env, leaf));
-        self.id_leaves[k].1.push(leaf);
+        self.m.id_leaves[k].1.push(leaf);
         assert_eq!(
             from_u256(&self.allow_lists[k].1.get_root()),
-            merkle_root_padded(&self.id_leaves[k].1, ID_LEVELS as usize),
+            merkle_root_padded(&self.m.id_leaves[k].1, ID_LEVELS as usize),
             "allow-list root parity"
         );
         StellarAssetClient::new(&self.env, &self.token).mint(&p.account, &i128::from(usd * USD));
@@ -331,9 +325,118 @@ impl World {
         self.registry.epoch(&j)
     }
 
-    /// Today's budget state for `p`, recovered from BudgetStep events only.
     pub fn budget_state(&self, p: &Person) -> (u64, u64, Option<usize>) {
-        let e = self.epoch(p.jurisdiction);
+        self.m.budget_state(p, self.epoch(p.jurisdiction))
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn payment(
+        &mut self,
+        who: &Person,
+        spend: &[OwnedNote],
+        to: (Scalar, u64),
+        deposit: u64,
+        withdrawal: u64,
+        receiver_pack: &Pack,
+        recipient: &Address,
+    ) -> Payment {
+        let epoch = self.epoch(who.jurisdiction);
+        self.m.payment(who, spend, to, deposit, withdrawal, receiver_pack, recipient, epoch)
+    }
+
+    pub fn prove(&self, p: &Payment) -> Result<ClearanceProof> {
+        self.m.prove(p)
+    }
+
+    /// Submit; on success fold the pool's events into the mirrors and check
+    /// every mirror root against its contract.
+    pub fn submit(
+        &mut self,
+        who: &Person,
+        proof: &ClearanceProof,
+        ext: &ExtData,
+    ) -> Result<Submitted, clearance_pool::Error> {
+        match self.pool.try_transact(proof, ext, &who.account) {
+            Ok(Ok(())) => {}
+            Err(Ok(e)) => return Err(e),
+            other => panic!("unexpected transact outcome: {other:?}"),
+        }
+        let res = self.env.cost_estimate().resources();
+        let events = self.fold_events();
+        assert_eq!(
+            from_u256(&self.pool.get_root()),
+            PrefixTree::new(&self.m.notes, POOL_LEVELS as usize).root(),
+            "note tree root parity"
+        );
+        assert_eq!(
+            from_u256(&self.budget_tree.get_root()),
+            merkle_root_padded(&self.m.budget_leaves, BUDGET_LEVELS as usize),
+            "budget tree root parity"
+        );
+        Ok(Submitted { record: events, instructions: res.instructions, mem_bytes: res.mem_bytes })
+    }
+
+    /// Read the pool's events of the last call (XDR, as an RPC serves them).
+    fn fold_events(&mut self) -> SealedRecordEvent {
+        let all = self.env.events().all().filter_by_contract(&self.pool.address);
+        let mut record = None;
+        let mut first_index = None;
+        for ev in all.events() {
+            let ContractEventBody::V0(body) = &ev.body;
+            let name = match &body.topics[0] {
+                ScVal::Symbol(sym) => sym.to_string(),
+                _ => continue,
+            };
+            let field = |k: &str| -> &ScVal {
+                let ScVal::Map(Some(m)) = &body.data else { panic!("event data not a map") };
+                &m.iter().find(|e| matches!(&e.key, ScVal::Symbol(s) if s.to_string() == k)).expect(k).val
+            };
+            match name.as_str() {
+                "new_commitment_event" => {
+                    let cm = sc_scalar(&body.topics[1]);
+                    let ScVal::U32(index) = field("index") else { panic!("index") };
+                    first_index.get_or_insert(*index as usize);
+                    assert_eq!(*index as usize, self.m.notes.len(), "note index order");
+                    self.m.notes.push(cm);
+                }
+                "budget_step" => {
+                    let n = sc_scalar(&body.topics[1]);
+                    let c = sc_scalar(field("commitment"));
+                    let e = sc_scalar(field("enc_new_spent"));
+                    self.m.budget_steps.push((n, c, e));
+                    self.m.budget_leaves.push(c);
+                }
+                "sealed_record" => record = Some(sealed_record_from_xdr(&body.topics, &body.data)),
+                _ => {}
+            }
+        }
+        let mut r = record.expect("sealed_record event");
+        r.first_note_index = first_index.expect("note events");
+        r
+    }
+}
+
+impl Mirror {
+    pub fn new(env: &Env, pool: Address, token: Address, salt: u64) -> Self {
+        Self {
+            env: env.clone(),
+            pool,
+            token,
+            notes: Vec::new(),
+            budget_leaves: Vec::new(),
+            budget_steps: Vec::new(),
+            id_leaves: [(NG, Vec::new()), (GH, Vec::new())],
+            packs: [ng_pack(), gh_pack()],
+            salt,
+        }
+    }
+
+    fn fresh(&mut self) -> Scalar {
+        self.salt += 1;
+        s(0xB11D_0000 + self.salt)
+    }
+
+    pub fn budget_state(&self, p: &Person, e: u64) -> (u64, u64, Option<usize>) {
         let (mut seq, mut spent, mut idx) = (0, 0, None);
         while self.budget_steps.iter().any(|b| b.0 == budget_nullifier(p.id, e, seq)) {
             let k = budget_key(p.id, e, seq + 1);
@@ -365,9 +468,10 @@ impl World {
         withdrawal: u64,
         receiver_pack: &Pack,
         recipient: &Address,
+        epoch: u64,
     ) -> Payment {
         let env = self.env.clone();
-        let sender_pack = if who.jurisdiction == NG { ng_pack() } else { gh_pack() };
+        let sender_pack = self.packs[usize::from(who.jurisdiction == GH)].clone();
         let nk = note_key(who.id);
         let me = derive_public_key(nk);
 
@@ -378,7 +482,7 @@ impl World {
             encrypted_output0: Bytes::new(&env),
             encrypted_output1: Bytes::new(&env),
         };
-        let ext_hash = env.as_contract(&self.pool.address, || hash_ext_data(&env, &ext, &self.token));
+        let ext_hash = env.as_contract(&self.pool, || hash_ext_data(&env, &ext, &self.token));
         let ext_scalar = from_u256(&U256::from_be_bytes(&env, &Bytes::from(ext_hash.clone())));
 
         // inputs (real notes from the tree, or zero-amount dummies)
@@ -434,13 +538,13 @@ impl World {
         i.set("idPathElements", id_path.iter().map(|e| big(*e)).collect::<Vec<_>>());
         i.set("idPathIndices", BigInt::from(id_bits));
 
-        let (seq, spent, bidx) = self.budget_state(who);
+        let (seq, spent, bidx) = self.budget_state(who, epoch);
         let (bpath, bbits) = match bidx {
             Some(x) => merkle_proof_padded(&self.budget_leaves, x, BUDGET_LEVELS as usize),
             None => (vec![s(0); BUDGET_LEVELS as usize], 0),
         };
         i.set("budgetRoot", big(merkle_root_padded(&self.budget_leaves, BUDGET_LEVELS as usize)));
-        i.set("epoch", BigInt::from(self.epoch(who.jurisdiction)));
+        i.set("epoch", BigInt::from(epoch));
         i.set("budgetSeq", BigInt::from(seq));
         i.set("budgetSpent", BigInt::from(spent));
         i.set("budgetPathElements", bpath.iter().map(|e| big(*e)).collect::<Vec<_>>());
@@ -510,85 +614,26 @@ impl World {
         })
     }
 
-    /// Submit; on success fold the pool's events into the mirrors and check
-    /// every mirror root against its contract.
-    pub fn submit(
-        &mut self,
-        who: &Person,
-        proof: &ClearanceProof,
-        ext: &ExtData,
-    ) -> Result<Submitted, clearance_pool::Error> {
-        match self.pool.try_transact(proof, ext, &who.account) {
-            Ok(Ok(())) => {}
-            Err(Ok(e)) => return Err(e),
-            other => panic!("unexpected transact outcome: {other:?}"),
-        }
-        let res = self.env.cost_estimate().resources();
-        let events = self.fold_events();
-        assert_eq!(
-            from_u256(&self.pool.get_root()),
-            PrefixTree::new(&self.notes, POOL_LEVELS as usize).root(),
-            "note tree root parity"
-        );
-        assert_eq!(
-            from_u256(&self.budget_tree.get_root()),
-            merkle_root_padded(&self.budget_leaves, BUDGET_LEVELS as usize),
-            "budget tree root parity"
-        );
-        Ok(Submitted { record: events, instructions: res.instructions, mem_bytes: res.mem_bytes })
-    }
+}
 
-    /// Read the pool's events of the last call (XDR, as an RPC serves them).
-    fn fold_events(&mut self) -> SealedRecordEvent {
-        let all = self.env.events().all().filter_by_contract(&self.pool.address);
-        let mut record = None;
-        let mut first_index = None;
-        for ev in all.events() {
-            let ContractEventBody::V0(body) = &ev.body;
-            let name = match &body.topics[0] {
-                ScVal::Symbol(sym) => sym.to_string(),
-                _ => continue,
-            };
-            let field = |k: &str| -> &ScVal {
-                let ScVal::Map(Some(m)) = &body.data else { panic!("event data not a map") };
-                &m.iter().find(|e| matches!(&e.key, ScVal::Symbol(s) if s.to_string() == k)).expect(k).val
-            };
-            match name.as_str() {
-                "new_commitment_event" => {
-                    let cm = sc_scalar(&body.topics[1]);
-                    let ScVal::U32(index) = field("index") else { panic!("index") };
-                    first_index.get_or_insert(*index as usize);
-                    assert_eq!(*index as usize, self.notes.len(), "note index order");
-                    self.notes.push(cm);
-                }
-                "budget_step" => {
-                    let n = sc_scalar(&body.topics[1]);
-                    let c = sc_scalar(field("commitment"));
-                    let e = sc_scalar(field("enc_new_spent"));
-                    self.budget_steps.push((n, c, e));
-                    self.budget_leaves.push(c);
-                }
-                "sealed_record" => {
-                    let vecs = |k: &str| -> Vec<Scalar> {
-                        let ScVal::Vec(Some(v)) = field(k) else { panic!("{k}") };
-                        v.iter().map(sc_scalar).collect()
-                    };
-                    let ScVal::U32(sj) = &body.topics[1] else { panic!("sj") };
-                    let ScVal::U32(rj) = &body.topics[2] else { panic!("rj") };
-                    record = Some(SealedRecordEvent {
-                        sender_jurisdiction: *sj,
-                        receiver_jurisdiction: *rj,
-                        r: vecs("record_r"),
-                        c: vecs("record_c"),
-                        first_note_index: 0,
-                    });
-                }
-                _ => {}
-            }
-        }
-        let mut r = record.expect("sealed_record event");
-        r.first_note_index = first_index.expect("note events");
-        r
+/// Decode a `sealed_record` event (topics and data as XDR, as an RPC serves them).
+pub fn sealed_record_from_xdr(topics: &[ScVal], data: &ScVal) -> SealedRecordEvent {
+    let ScVal::Map(Some(m)) = data else { panic!("event data not a map") };
+    let field = |k: &str| -> &ScVal {
+        &m.iter().find(|e| matches!(&e.key, ScVal::Symbol(s) if s.to_string() == k)).expect(k).val
+    };
+    let vecs = |k: &str| -> Vec<Scalar> {
+        let ScVal::Vec(Some(v)) = field(k) else { panic!("{k}") };
+        v.iter().map(sc_scalar).collect()
+    };
+    let ScVal::U32(sj) = &topics[1] else { panic!("sender jurisdiction topic") };
+    let ScVal::U32(rj) = &topics[2] else { panic!("receiver jurisdiction topic") };
+    SealedRecordEvent {
+        sender_jurisdiction: *sj,
+        receiver_jurisdiction: *rj,
+        r: vecs("record_r"),
+        c: vecs("record_c"),
+        first_note_index: 0,
     }
 }
 

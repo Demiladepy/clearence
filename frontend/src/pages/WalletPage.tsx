@@ -196,6 +196,9 @@ export default function WalletPage() {
               <div className="app-drawer-dim">
                 {IS_MOCK ? 'Mock SDK' : 'Live SDK'} &middot; fixed demo rate &#8358;1,600 per USD
               </div>
+              <div className="app-drawer-dim">
+                <Link className="app-drawer-a" to="/operator">Open operator console</Link>
+              </div>
             </div>
           )}
         </div>
@@ -203,3 +206,4 @@ export default function WalletPage() {
     </div>
   )
 }
+

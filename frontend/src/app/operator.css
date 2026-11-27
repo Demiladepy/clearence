@@ -1,0 +1,265 @@
+.op-shell {
+  min-height: 100vh;
+  background: #F3EFE6;
+  color: #15181B;
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+}
+
+.op-wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 28px 24px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.op-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.op-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-weight: 700;
+  font-size: 21px;
+}
+
+.op-sub {
+  margin-left: 6px;
+  padding-left: 14px;
+  border-left: 1.5px solid #15181B;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  color: #565B5F;
+}
+
+.op-link,
+.op-link-btn {
+  color: #1E6B4B;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: underline;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Instrument Sans', sans-serif;
+}
+
+.op-grid {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .op-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.op-card {
+  background: #FFFFFF;
+  border: 1.5px solid #15181B;
+  border-radius: 18px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.op-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.op-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #565B5F;
+}
+
+.op-pack-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  font-size: 40px;
+  letter-spacing: -0.02em;
+}
+
+.op-table {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  border: 1.5px solid #15181B;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.op-trow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1.5px solid rgba(21, 24, 27, 0.18);
+}
+
+.op-thead {
+  border-top: 0;
+  background: #E9E3D3;
+  font-size: 12px;
+}
+
+.op-num {
+  text-align: right;
+}
+
+.op-span2 {
+  grid-column: span 2;
+}
+
+.op-travel {
+  background: #F3EFE6;
+}
+
+.op-btn {
+  height: 52px;
+  border: 0;
+  border-radius: 14px;
+  background: #15181B;
+  color: #F3EFE6;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.op-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.op-btn:focus-visible,
+.op-open:focus-visible,
+.op-link:focus-visible,
+.op-link-btn:focus-visible {
+  outline: 3px solid #1E6B4B;
+  outline-offset: 2px;
+}
+
+.op-good {
+  color: #1E6B4B;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.op-error {
+  color: #8F4300;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.op-note {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #565B5F;
+}
+
+.op-foot {
+  text-align: center;
+}
+
+.op-empty {
+  font-size: 14px;
+  color: #565B5F;
+  border-top: 1.5px solid #15181B;
+  padding-top: 14px;
+}
+
+.op-rec {
+  border-top: 1.5px solid #15181B;
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.op-rec-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.op-rec-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.op-rec-meta {
+  font-size: 13px;
+  color: #565B5F;
+}
+
+.op-open {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1.5px solid #15181B;
+  border-radius: 999px;
+  background: transparent;
+  color: #15181B;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.op-open-done {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: #1E6B4B;
+  border: 2px solid #1E6B4B;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.op-rec-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.op-rrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.op-bar {
+  display: inline-block;
+  width: 110px;
+  height: 15px;
+  background: #15181B;
+  border-radius: 2px;
+}
+
+.op-flag {
+  color: #8F4300;
+  font-weight: 500;
+}
+
+.op-rec-foot {
+  font-size: 12px;
+  color: #565B5F;
+}

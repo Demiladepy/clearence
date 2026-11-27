@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../app/AppContext'
 import { ClearanceError } from '../sdk/errors'
 import { DEMO_CHIDI, IS_MOCK, nairaToUsd, usdToNaira } from '../sdk/mock'
@@ -33,8 +33,10 @@ const toNgn = (usd: number) => Math.round(usdToNaira(usd))
 export default function SendPage() {
   const { session, client, addEntry } = useApp()
   const navigate = useNavigate()
+  const loc = useLocation()
+  const initial = (loc.state as { amount?: number } | null)?.amount ?? 25000
   const [stage, setStage] = useState<Stage>('amount')
-  const [amount, setAmount] = useState(25000)
+  const [amount, setAmount] = useState(initial)
   const [custom, setCustom] = useState('')
   const [budget, setBudget] = useState<Budget | null>(null)
   const [done, setDone] = useState(0)
@@ -474,3 +476,5 @@ export default function SendPage() {
     </div>
   )
 }
+
+

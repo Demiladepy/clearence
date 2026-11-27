@@ -45,12 +45,13 @@ for c in "$ROOT"/contracts/*/; do
   rm -rf "$UP/contracts/$n/target" "$UP/contracts/$n/test_snapshots"
 done
 cp -r "$ROOT/e2e" "$UP/clearance-e2e"
+rm -rf "$UP/clearance-wasm" && cp -r "$ROOT/packages/sdk-wasm" "$UP/clearance-wasm" && rm -rf "$UP/clearance-wasm/pkg" "$UP/clearance-wasm/target"
 rm -rf "$UP/clearance-e2e/target" "$UP/clearance-e2e/test_snapshots"
 
 # 3. Keep the overlay out of the submodule's status.
 EXCL="$(git -C "$UP" rev-parse --git-path info/exclude)"
 case "$EXCL" in /*) ;; *) EXCL="$UP/$EXCL" ;; esac
-for pat in /circuits/src/clearance/ /contracts/rule-registry/ /contracts/clearance-pool/ /clearance-e2e/ \
+for pat in /circuits/src/clearance/ /contracts/rule-registry/ /contracts/clearance-pool/ /clearance-e2e/ /clearance-wasm/ \
            /circuits/src/test/circuits/clearance_budget_test.circom \
            /circuits/src/test/clearance_*.rs \
            /circuits/src/test/circuits/pack_hash_test.circom \

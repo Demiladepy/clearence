@@ -1,0 +1,44 @@
+{
+  "ranAt": "2026-11-27T13:38:42.403Z",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/157.0.8103.78 Safari/537.36",
+  "steps": [
+    {
+      "step": "NG operator issues Ada tier 1 (browser)",
+      "tx": "ec266288c99c4a59785ec142b2d0cd196cc744187c5e2f1fa08528938694bff3"
+    },
+    {
+      "step": "Ada deposits 10 (proved in Chromium)",
+      "tx": "3bc558e7372377c1bfc0bbe54307bd0c1572398c4b7c48b49aef5e79647dfd04",
+      "explorer": "https://stellar.expert/explorer/testnet/tx/3bc558e7372377c1bfc0bbe54307bd0c1572398c4b7c48b49aef5e79647dfd04",
+      "provingMs": 6247
+    },
+    {
+      "step": "Ada pays Kofi 2 NG -> GH (proved in Chromium)",
+      "tx": "f9f17043593db1481a7c563eb3d0033ca94451130a503f9a8aa1a18939101dcf",
+      "explorer": "https://stellar.expert/explorer/testnet/tx/f9f17043593db1481a7c563eb3d0033ca94451130a503f9a8aa1a18939101dcf",
+      "provingMs": 6154
+    }
+  ],
+  "progress": [
+    "identity@584",
+    "perPayment@602",
+    "dailyBudget@6849",
+    "sealed@6849",
+    "submitting@6850",
+    "verified@8668"
+  ],
+  "kofiBalanceUsd": 2,
+  "adaSpentTodayUsd": 2,
+  "openedByNg": {
+    "recordId": "0025566286750724096-0000000006",
+    "sender": "3584096961315956048095761093062899539934336251760937013790782932603117143684",
+    "receiver": "6064120198703221357086494226851359482062809880623411540305953244597364804602",
+    "amountUsd": 2,
+    "epoch": 20784,
+    "travelRuleFlag": false,
+    "senderJurisdiction": "NG",
+    "receiverJurisdiction": "GH",
+    "packVersion": "NG-v1"
+  },
+  "adaIdCommitment": "3584096961315956048095761093062899539934336251760937013790782932603117143684"
+}

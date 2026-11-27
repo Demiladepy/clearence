@@ -12,7 +12,8 @@ Read [README.md](README.md) first. Follow the [prove-it](.claude/skills/prove-it
 | `contracts/rule-registry/` | Soroban contract: per-country rule packs, epochs, corridors, allow-list pointers | Demilade |
 | `contracts/clearance-pool/` | Soroban contract: the pool that verifies Clearance proofs and enforces the registry | Demilade |
 | `e2e/` | End-to-end tests: real proofs against all real contracts in the Soroban test host | Demilade |
-| `packages/sdk/` | TypeScript SDK (types are the contract with the UI) | Demilade |
+| `packages/sdk/` | TypeScript SDK, live on testnet (types are the contract with the UI); `docs/sdk.md` | Demilade |
+| `packages/sdk-wasm/` | Rust crate compiled to WASM for the SDK: Clearance hashes, trees, record opening, Groth16 prover | Demilade |
 | UI | Separate, built against `packages/sdk` types | Michael |
 | `upstream/nethermind-spp/` | Nethermind SPP, git submodule pinned at `cd6c8fc`. **Do not edit.** | upstream |
 | `upstream-patches/` | The only edits we make to upstream files, as patches | Demilade |

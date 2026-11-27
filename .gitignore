@@ -7,3 +7,4 @@ target/
 .secrets/
 test_snapshots/
 *.tmp
+packages/sdk/test/browser/dist/

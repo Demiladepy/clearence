@@ -5,7 +5,7 @@
 UP := upstream/nethermind-spp
 EVIDENCE := docs/evidence
 
-.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo test test-contracts test-circuits test-e2e test-sdk verify evidence
+.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo sdk-assets test-sdk-testnet test-sdk-browser test test-contracts test-circuits test-e2e test-sdk verify evidence
 
 help:
 	@echo "make setup          init the pinned upstream submodule"
@@ -56,6 +56,20 @@ testnet-demo: sync
 
 test-sdk:
 	pnpm -C packages/sdk typecheck
+	pnpm -C packages/sdk build
+
+# Rebuild the SDK's WASM module, witness calculator and circuit artifacts.
+sdk-assets: circuits
+	./scripts/build-sdk-assets.sh
+
+# The SDK against Stellar testnet: Node (payer + operator flows, a brand-new
+# user), then headless Chromium with in-browser proving. Needs the CLI
+# identities and .secrets/ (see docs/sdk.md); in this container, the relay.
+test-sdk-testnet:
+	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} pnpm test:testnet
+
+test-sdk-browser:
+	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} pnpm test:browser
 
 test: test-contracts test-circuits test-e2e test-sdk
 

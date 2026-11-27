@@ -49,6 +49,31 @@ for s in d["steps"]:
     ops = "; ".join(f"record {o['record']}: {o['sent_usd']} USD, flag {o['travel_rule_flag']}" for o in s["opened_by_operators"])
     print(f"| {s['step']} | [{s['tx'][:10]}...]({s['explorer']}) | {s['proving_ms']} ms | {s.get('fee_charged_stroops') or 'n/a'} | {ops} |")
 PY
+
+  echo "## SDK on Stellar testnet"
+  echo
+  python3 - "$ROOT/deployments" <<'PY' || echo "(no SDK run recorded)"
+import json, sys, os
+d = sys.argv[1]
+def rows(path, title):
+    if not os.path.exists(path):
+        print(f"{title}: not run\n"); return
+    r = json.load(open(path))
+    print(f"**{title}** ({r.get('ranAt','')}){' in ' + r['userAgent'] if 'userAgent' in r else ''}\n")
+    print("| Step | Transaction | Proving |\n|---|---|---:|")
+    for s in r.get("steps", []):
+        ms = f"{s['provingMs']} ms" if s.get("provingMs") else ""
+        print(f"| {s['step']} | [{s['tx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{s['tx']}) | {ms} |")
+    print()
+rows(f"{d}/sdk-node-run.json", "Node: payer and operator flows")
+rows(f"{d}/sdk-browser-run.json", "Headless Chromium: in-browser proving")
+nu = f"{d}/sdk-new-user-run.json"
+if os.path.exists(nu):
+    r = json.load(open(nu))
+    print(f"**Brand-new user** ({r['ranAt']}): trustline [{r['trustlineTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['trustlineTx']}), "
+          f"KYC [{r['kycTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['kycTx']}), "
+          f"first deposit [{r['depositTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['depositTx']}) ({r['provingMs']} ms proving).\n")
+PY
   echo
   echo "Upstream baselines we extend:"
   echo

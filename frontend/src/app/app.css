@@ -569,3 +569,9 @@
 .app-code {
   font-size: 12px;
 }
+
+.app-btn-outline {
+  background: transparent;
+  color: #15181B;
+  border: 1.5px solid #15181B;
+}

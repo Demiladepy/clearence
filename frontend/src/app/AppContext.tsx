@@ -1,6 +1,10 @@
 import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReactNode } from 'react'
+import { StellarWalletsKit } from '@creit-tech/stellar-wallets-kit/sdk'
+import { FreighterModule } from '@creit-tech/stellar-wallets-kit/modules/freighter'
+import { AlbedoModule } from '@creit-tech/stellar-wallets-kit/modules/albedo'
 import { connectMock, createDemoWallet, DEMO_ADA } from '../sdk/mock'
+import type { WalletLike } from '../sdk/types'
 
 type Client = Awaited<ReturnType<typeof connectMock>>
 
@@ -25,11 +29,20 @@ interface AppState {
   client: Client | null
   history: Entry[]
   signIn: (name: string) => Promise<void>
+  connectWallet: () => Promise<void>
   signOut: () => void
   addEntry: (e: Omit<Entry, 'id' | 'at'>) => void
 }
 
 const Ctx = createContext<AppState | null>(null)
+
+let kitReady = false
+function ensureKit() {
+  if (!kitReady) {
+    StellarWalletsKit.init({ modules: [new FreighterModule(), new AlbedoModule()] })
+    kitReady = true
+  }
+}
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
@@ -42,6 +55,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setClient(c)
     setHistory([])
     setSession({ name })
+  }, [])
+
+  const connectWallet = useCallback(async () => {
+    ensureKit()
+    const { address } = await StellarWalletsKit.authModal()
+    const wallet: WalletLike = {
+      getAddress: () => StellarWalletsKit.getAddress(),
+      signTransaction: async (xdr, opts) => {
+        const r = await StellarWalletsKit.signTransaction(xdr, {
+          networkPassphrase: opts?.networkPassphrase,
+        })
+        return { signedTxXdr: r.signedTxXdr }
+      },
+    }
+    const c = await connectMock({ network: 'testnet', pool: 'CMOCKPOOL', wallet })
+    setClient(c)
+    setHistory([])
+    setSession({ name: address.slice(0, 4) + '\u2026' + address.slice(-4) })
   }, [])
 
   const signOut = useCallback(() => {
@@ -58,7 +89,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <Ctx.Provider value={{ session, client, history, signIn, signOut, addEntry }}>
+    <Ctx.Provider
+      value={{ session, client, history, signIn, connectWallet, signOut, addEntry }}
+    >
       {children}
     </Ctx.Provider>
   )
@@ -69,3 +102,4 @@ export function useApp(): AppState {
   if (!v) throw new Error('useApp must be used inside AppProvider')
   return v
 }
+

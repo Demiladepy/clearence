@@ -5,7 +5,7 @@ import { useApp } from '../app/AppContext'
 import '../app/app.css'
 
 export default function SignupPage() {
-  const { signIn } = useApp()
+  const { signIn, connectWallet } = useApp()
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -17,6 +17,18 @@ export default function SignupPage() {
     setBusy(true)
     await signIn(displayName)
     navigate('/app/home')
+  }
+
+  async function connect() {
+    setBusy(true)
+    setError('')
+    try {
+      await connectWallet()
+      navigate('/app/home')
+    } catch {
+      setError('Wallet connection was cancelled or failed. Nothing changed.')
+      setBusy(false)
+    }
   }
 
   function onSubmit(e: FormEvent) {
@@ -97,6 +109,14 @@ export default function SignupPage() {
               Create account
             </button>
             <button
+              className="app-btn app-btn-outline"
+              type="button"
+              disabled={busy}
+              onClick={() => void connect()}
+            >
+              Connect a Stellar wallet
+            </button>
+            <button
               className="app-link"
               type="button"
               disabled={busy}
@@ -109,8 +129,7 @@ export default function SignupPage() {
 
         <div className="app-foot">
           <span>
-            Demo only. Nothing you type here is stored or sent. Marigold is a
-            fictional app.
+            Marigold is a fictional demo app. Nothing you enter is stored.
           </span>
           <span className="app-powered">
             <svg width="14" height="14" viewBox="0 0 26 26" aria-hidden="true">

@@ -9,10 +9,10 @@ export { ClearanceError, humanMessage, type ClearanceErrorCode, type ErrorContex
 export { JURISDICTIONS } from "./types.js";
 export type * from "./types.js";
 export { TESTNET, LEVELS, usdToStroops, stroopsToUsd, type Deployment } from "./config.js";
-export { ClearanceClient, clearanceAddress, newIdentitySecret, type ClientOptions, type OwnedNote } from "./client.js";
+export { ClearanceClient, clearanceAddress, newIdentitySecret, type ClientOptions, type OwnedNote, type OnboardResult } from "./client.js";
 export { ClearanceOperator, type OperatorOptions, type PackRules } from "./operator.js";
 export { fetchArtifacts, ProofEngine, ConstraintError, type CircuitArtifacts, type ProofResult } from "./prover.js";
-export { initCrypto, packHash, idCommitment, operatorPublicKey } from "./crypto.js";
-export { poolState, activePack, extDataHash, type PoolState, type ActivePack, type SealedRecordEvent } from "./state.js";
+export { initCrypto, packHash, idCommitment, operatorPublicKey, tierLeaf } from "./crypto.js";
+export { poolState, treeLeaves, activePack, extDataHash, type PoolState, type ActivePack, type SealedRecordEvent } from "./state.js";
 export { Chain } from "./chain.js";
 export { keypairWallet } from "./wallets.js";

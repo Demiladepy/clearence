@@ -1,0 +1,10 @@
+{
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../sdk && pnpm build",
+  "functions": {
+    "api/onboard.ts": {
+      "maxDuration": 60,
+      "includeFiles": "node_modules/@clearance/sdk/dist/wasm/**"
+    }
+  }
+}

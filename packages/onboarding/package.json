@@ -1,0 +1,23 @@
+{
+  "name": "@clearance/onboarding",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Testnet onboarding: give a new visitor test CLRUSD and an on-chain tier 1 from the jurisdiction's operator",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json --noEmit",
+    "start": "tsx src/server.ts",
+    "test:testnet": "tsx --test test/onboard.test.ts"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@clearance/sdk": "workspace:*",
+    "@stellar/stellar-sdk": "17.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.0",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
+  }
+}

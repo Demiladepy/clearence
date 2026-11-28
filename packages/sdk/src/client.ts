@@ -7,6 +7,7 @@
  */
 import { Buffer } from "buffer";
 import nacl from "tweetnacl";
+import { Networks } from "@stellar/stellar-sdk";
 import { Chain } from "./chain.js";
 import { LEVELS, TESTNET, type Deployment, stroopsToUsd, usdToStroops } from "./config.js";
 import * as c from "./crypto.js";
@@ -90,6 +91,17 @@ function openNote(sk: Uint8Array, data: Uint8Array): { amount: bigint; blinding:
   } catch {
     return null;
   }
+}
+
+export interface OnboardResult {
+  jurisdiction: string;
+  tier: 1;
+  /** On-chain KYC (allow-list insert); absent if the identity was already listed. */
+  kycTx?: string;
+  /** Test CLRUSD granted to the public balance. */
+  mintTx?: string;
+  grantUsd: number;
+  trustlineTx?: string;
 }
 
 export class ClearanceClient {
@@ -222,6 +234,38 @@ export class ClearanceClient {
   /** One-time: let this Stellar account hold the pool's token (signed by the wallet). */
   async addTokenTrustline(): Promise<{ txHash: string }> {
     return { txHash: await this.chain.addTrustline(this.d.asset.code, this.d.asset.issuer) };
+  }
+
+  /**
+   * Testnet onboarding through a Clearance onboarding service
+   * (packages/onboarding): makes sure the Stellar account exists (friendbot)
+   * and trusts CLRUSD (signed in the user's wallet), then asks the service to
+   * grant test CLRUSD and have this jurisdiction's operator issue tier 1
+   * on-chain. Resolves once the tier is visible on-chain.
+   */
+  async onboard(serviceUrl: string): Promise<OnboardResult> {
+    if (this.d.networkPassphrase !== Networks.TESTNET) throw new Error("onboarding is a testnet service");
+    try {
+      await this.chain.server.getAccount(this.address);
+    } catch {
+      const fb = await fetch(`https://friendbot.stellar.org/?addr=${encodeURIComponent(this.address)}`);
+      if (!fb.ok) throw new Error(`friendbot could not fund ${this.address} (${fb.status})`);
+    }
+    let trustlineTx: string | undefined;
+    try {
+      await this.getPublicBalance();
+    } catch {
+      trustlineTx = (await this.addTokenTrustline()).txHash;
+    }
+    const res = await fetch(serviceUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ address: this.address, idCommitment: this.idCommitment, jurisdiction: this.jurisdiction }),
+    });
+    const body = (await res.json().catch(() => ({}))) as Partial<OnboardResult> & { error?: string; message?: string };
+    if (!res.ok) throw new Error(`onboarding refused: ${body.error ?? res.status}${body.message ? `: ${body.message}` : ""}`);
+    for (let i = 0; i < 20 && !(await this.getTier()); i++) await new Promise((r) => setTimeout(r, 1500));
+    return { ...(body as OnboardResult), ...(trustlineTx ? { trustlineTx } : {}) };
   }
 
   /** Public token balance of the connected Stellar account (stroops). */

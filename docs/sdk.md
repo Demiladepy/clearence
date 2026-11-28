@@ -80,6 +80,19 @@ const operator = await ClearanceOperator.connect({ wallet, jurisdiction: "NG", r
 `recordKey` is the operator's Baby JubJub private key (from `gvkey-gen`); it never leaves the
 operator's machine. `wallet` must be the jurisdiction admin's account (`clr-ng` on testnet).
 
+### Onboarding a new visitor (public site)
+
+Never ship demo keys in the bundle. Each visitor gets their own funded, KYC'd testnet account
+from the onboarding service ([packages/onboarding](../packages/onboarding/README.md)):
+
+```ts
+const client = await ClearanceClient.connect({ wallet, identitySecret, jurisdiction: "NG", artifacts });
+if (!(await client.getTier())) await client.onboard(ONBOARDING_URL);   // friendbot, trustline, tier 1, 100 CLRUSD
+```
+
+`onboard` asks the wallet to sign one trustline, then waits until tier 1 is visible on-chain.
+Once per Stellar account.
+
 ### Getting test tokens
 
 The pool's token is **CLRUSD**, a testnet test token (not USDC). A new account:

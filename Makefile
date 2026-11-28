@@ -5,7 +5,7 @@
 UP := upstream/nethermind-spp
 EVIDENCE := docs/evidence
 
-.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo sdk-assets test-sdk-testnet test-sdk-browser demo-accounts test-demo-story test test-contracts test-circuits test-e2e test-sdk verify evidence
+.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo sdk-assets test-sdk-testnet test-sdk-browser demo-accounts test-demo-story test-onboarding onboarding-server test test-contracts test-circuits test-e2e test-sdk verify evidence
 
 help:
 	@echo "make setup          init the pinned upstream submodule"
@@ -57,6 +57,7 @@ testnet-demo: sync
 test-sdk:
 	pnpm -C packages/sdk typecheck
 	pnpm -C packages/sdk build
+	pnpm -C packages/onboarding typecheck
 
 # Rebuild the SDK's WASM module, witness calculator and circuit artifacts.
 sdk-assets: circuits
@@ -70,6 +71,14 @@ test-sdk-testnet:
 
 test-demo-story:
 	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} npx tsx --test test/demo-story.test.ts
+
+test-onboarding:
+	cd packages/sdk && pnpm build >/dev/null
+	cd packages/onboarding && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} pnpm test:testnet
+
+onboarding-server:
+	cd packages/sdk && pnpm build >/dev/null
+	cd packages/onboarding && CLR_ADMIN_SECRET=$$(stellar keys show clr-admin) CLR_NG_OPERATOR_SECRET=$$(stellar keys show clr-ng) CLR_GH_OPERATOR_SECRET=$$(stellar keys show clr-gh) pnpm start
 
 demo-accounts:
 	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} npx tsx test/provision-demo.ts

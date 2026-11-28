@@ -1,0 +1,17 @@
+{
+  "ranAt": "2026-11-28T14:02:33.138Z",
+  "account": "GDTDRNXN7TD3RJ4NVZRW5GVKBCFU6YH4OA3UMBJYFOTLIM4RNM35HON5",
+  "onboardMs": 20900,
+  "trustlineTx": "b0d20fd175fd651dcc0a0dc801bb8fe1b8570ffca752f6f8e5207aede5ceec3a",
+  "kycTx": "a51e89d923de2e8ebcc242f2f718c41ad5aa659b1bad99cce1f3afdd1327e53b",
+  "mintTx": "9c2cdca58a2c75590fcec363f7e041d12ec4b9732e45bd3b3a8183ea5e34dee0",
+  "depositTx": "94cd20296dd03925e25039bb857be4849e07f1ee8a56b4f40f94a265485c4afe",
+  "refused": [
+    "ALREADY_ONBOARDED",
+    "NO_TRUSTLINE",
+    "BAD_ADDRESS",
+    "BAD_ID_COMMITMENT",
+    "BAD_JURISDICTION",
+    "JURISDICTION_NOT_SERVED"
+  ]
+}

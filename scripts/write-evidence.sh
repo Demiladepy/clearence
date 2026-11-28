@@ -82,6 +82,13 @@ if os.path.exists(st):
         t = f"[{x['tx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{x['tx']})" if x.get("tx") else "none"
         print(f"| {x['step']} | {t} | {str(x['provingMs']) + ' ms' if x.get('provingMs') else ''} |")
     print()
+ob = f"{d}/onboarding-run.json"
+if os.path.exists(ob):
+    r = json.load(open(ob))
+    tx = lambda k: f"[{r[k][:10]}...](https://stellar.expert/explorer/testnet/tx/{r[k]})"
+    print(f"**Onboarding service** ({r['ranAt']}, `make test-onboarding`): a brand-new visitor to a funded, KYC'd account in {r['onboardMs']} ms: "
+          f"trustline {tx('trustlineTx')}, KYC {tx('kycTx')}, grant {tx('mintTx')}, then a private deposit {tx('depositTx')}. "
+          f"Refused as expected: {', '.join(r['refused'])}.\n")
 da = f"{d}/demo-accounts.json"
 if os.path.exists(da):
     r = json.load(open(da))

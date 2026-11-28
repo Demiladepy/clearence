@@ -1,8 +1,8 @@
 import './Developers.css'
 
-const code = `const clearance = await Clearance.connect({ network: "testnet", pool, wallet })
-await clearance.send({ to, amountUsd: 15.625 })  // \u20A625,000: cleared
-await clearance.send({ to, amountUsd: 17.5 })    // \u20A628,000: not sent, OVER_DAILY_BUDGET`
+const code = `const client = await ClearanceClient.connect({ wallet, identitySecret, jurisdiction: "NG", artifacts })
+await client.send({ to, amountUsd: 15.625 })  // \u20A625,000: cleared
+await client.send({ to, amountUsd: 17.5 })    // \u20A628,000: not sent, OVER_DAILY_BUDGET`
 
 export default function Developers() {
   return (
@@ -25,7 +25,7 @@ export default function Developers() {
         </div>
 
         <div className="dev-code">
-          <div className="dev-code-label">SDK preview, API not final</div>
+          <div className="dev-code-label">@clearance/sdk, live on Stellar testnet</div>
           <pre className="dev-pre"><code>{code}</code></pre>
         </div>
       </div>

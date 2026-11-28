@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useApp } from '../app/AppContext'
-import { IS_MOCK, usdToNaira } from '../sdk/mock'
+import { errText, usdToNaira } from '../sdk/clearance'
 import type { Balance, Budget } from '../sdk/types'
 import { formatNaira, METER_TICKS } from '../data/content'
 import '../app/app.css'
@@ -12,18 +12,27 @@ export default function WalletPage() {
   const { session, client, history, signOut } = useApp()
   const [budget, setBudget] = useState<Budget | null>(null)
   const [balance, setBalance] = useState<Balance | null>(null)
+  const [verified, setVerified] = useState<boolean | null>(null)
+  const [loadError, setLoadError] = useState('')
   const [hide, setHide] = useState(false)
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
     if (!client) return
     let live = true
-    void Promise.all([client.getBudget(), client.getBalance()]).then(([b, bal]) => {
-      if (live) {
-        setBudget(b)
-        setBalance(bal)
-      }
-    })
+    setLoadError('')
+    void Promise.all([client.getBudget(), client.getBalance(), client.getTier()])
+      .then(([b, bal, t]) => {
+        if (live) {
+          setBudget(b)
+          setBalance(bal)
+          setVerified(t !== null)
+        }
+      })
+      .catch((e) => {
+        console.error(e)
+        if (live) setLoadError('Could not read from Stellar testnet. ' + errText(e))
+      })
     return () => {
       live = false
     }
@@ -71,6 +80,14 @@ export default function WalletPage() {
             {balance ? show(ngn(balance.shieldedUsd)) : '\u2014'}
           </div>
         </div>
+
+        {loadError && <div className="app-error" role="alert">{loadError}</div>}
+        {verified === false && (
+          <div className="app-note">
+            Your identity is not verified yet.{' '}
+            <Link className="app-inline" to="/app/verify">Verify identity</Link> to send.
+          </div>
+        )}
 
         <div className="app-actions">
           <Link className="app-btn" to="/app/send">Send privately</Link>
@@ -184,7 +201,6 @@ export default function WalletPage() {
                           </a>
                         </>
                       )}
-                      {IS_MOCK && ' (sample)'}
                     </div>
                   )}
                 </>
@@ -194,7 +210,7 @@ export default function WalletPage() {
                 </div>
               )}
               <div className="app-drawer-dim">
-                {IS_MOCK ? 'Mock SDK' : 'Live SDK'} &middot; fixed demo rate &#8358;1,600 per USD
+                Live SDK &middot; Stellar testnet &middot; fixed demo rate &#8358;1,600 per USD
               </div>
               <div className="app-drawer-dim">
                 <Link className="app-drawer-a" to="/operator">Open operator console</Link>
@@ -206,4 +222,3 @@ export default function WalletPage() {
     </div>
   )
 }
-

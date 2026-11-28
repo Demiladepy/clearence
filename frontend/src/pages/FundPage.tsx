@@ -1,19 +1,21 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useApp } from '../app/AppContext'
-import { IS_MOCK, nairaToUsd } from '../sdk/mock'
+import { stroopsToUsd } from '@clearance/sdk'
+import { errText, nairaToUsd } from '../sdk/clearance'
 import { formatNaira } from '../data/content'
 import '../app/app.css'
 
-const CHIPS = [100000, 400000]
+const CHIPS = [50000, 100000]
 const naira = (n: number) => '\u20A6' + formatNaira(n)
 
 export default function FundPage() {
   const { session, client } = useApp()
   const navigate = useNavigate()
-  const [amount, setAmount] = useState(100000)
+  const [amount, setAmount] = useState(50000)
   const [busy, setBusy] = useState(false)
   const [tx, setTx] = useState('')
+  const [url, setUrl] = useState('')
   const [error, setError] = useState('')
 
   if (!session) return <Navigate to="/app" replace />
@@ -23,10 +25,19 @@ export default function FundPage() {
     setBusy(true)
     setError('')
     try {
-      const r = await client.deposit(nairaToUsd(amount))
+      const usd = nairaToUsd(amount)
+      const have = await client.getPublicBalance().then(stroopsToUsd, () => null)
+      if (have === null || have < usd) {
+        setError('This account does not hold enough test funds for ' + naira(amount) + '. Nothing changed.')
+        setBusy(false)
+        return
+      }
+      const r = await client.deposit(usd)
       setTx(r.txHash)
-    } catch {
-      setError('Funding did not finish. Nothing changed. Try again.')
+      setUrl(r.explorerUrl)
+    } catch (e) {
+      console.error(e)
+      setError('Funding did not finish. Nothing changed. ' + errText(e))
     }
     setBusy(false)
   }
@@ -68,7 +79,7 @@ export default function FundPage() {
 
             <div className="app-foot">
               <button type="button" className="app-btn" disabled={busy} onClick={() => void fund()}>
-                {busy ? 'Funding\u2026' : 'Fund ' + naira(amount)}
+                {busy ? 'Funding\u2026 about 10 seconds' : 'Fund ' + naira(amount)}
               </button>
               <span className="app-center-text">
                 Testnet only. Fixed demo rate &#8358;1,600 per USD.
@@ -89,8 +100,10 @@ export default function FundPage() {
                 <span>tx {tx.slice(0, 6)}&hellip;{tx.slice(-4)}</span>
               </div>
             </div>
-            {IS_MOCK && (
-              <div className="app-note">Sample transaction. Real links come from the SDK.</div>
+            {url && (
+              <a className="app-inline" href={url} target="_blank" rel="noreferrer">
+                View on Stellar Expert
+              </a>
             )}
             <div className="app-foot">
               <button type="button" className="app-btn" onClick={() => navigate('/app/home')}>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../app/AppContext'
 import { ClearanceError } from '../sdk/errors'
-import { DEMO_CHIDI, IS_MOCK, nairaToUsd, usdToNaira } from '../sdk/mock'
+import { RECIPIENT, nairaToUsd, usdToNaira } from '../sdk/clearance'
 import type { Budget, ProofStep, Receipt } from '../sdk/types'
 import { formatNaira, METER_TICKS } from '../data/content'
 import '../app/app.css'
@@ -76,7 +76,7 @@ export default function SendPage() {
     const call = 'clearance.send({ to, amountUsd: ' + usd + ' })'
     try {
       const r = await client.send({
-        to: DEMO_CHIDI,
+        to: RECIPIENT.address,
         amountUsd: usd,
         onProgress: (p) => {
           const i = STEPS.findIndex((s) => s.key === p.step)
@@ -101,6 +101,7 @@ export default function SendPage() {
         setFailure({ code: e.code, message: e.userMessage })
         addEntry({ kind: 'not_sent', amountNgn: amount, call, code: e.code })
       } else {
+        console.error(e)
         setFailure({
           code: 'ERROR',
           message: 'Something went wrong. Nothing was sent.',
@@ -134,7 +135,7 @@ export default function SendPage() {
 
           <div className="app-field">
             <div className="app-label">To</div>
-            <div className="app-panel mono">{short(DEMO_CHIDI)}</div>
+            <div className="app-panel mono">{RECIPIENT.label} &middot; {short(RECIPIENT.address)}</div>
           </div>
 
           <div className="app-field">
@@ -223,7 +224,7 @@ export default function SendPage() {
           </div>
 
           <div className="app-panel app-rows mono">
-            <div className="app-row"><span>To</span><span>{short(DEMO_CHIDI)}</span></div>
+            <div className="app-row"><span>To</span><span>{RECIPIENT.label}</span></div>
             <div className="app-row"><span>From</span><span>Private balance</span></div>
             <div className="app-row"><span>Fee</span><span>None</span></div>
             <div className="app-row-top app-rows">
@@ -272,7 +273,7 @@ export default function SendPage() {
               <div className="app-steps-title">
                 {receipt ? 'Proof complete' : failure ? 'Stopped' : 'Proving your payment'}
               </div>
-              <div className="app-dim mono">{finished ? 'done' : 'about 4s'}</div>
+              <div className="app-dim mono">{finished ? 'done' : 'about 10s'}</div>
             </div>
             {STEPS.map((s, i) => {
               const isFailed = i === failedIdx
@@ -384,8 +385,7 @@ export default function SendPage() {
           </div>
 
           <div className="app-note">
-            {IS_MOCK ? 'Sample transaction. Real links come from the SDK. ' : ''}
-            Fixed demo rate &#8358;1,600 per USD.
+            Live on Stellar testnet. Fixed demo rate &#8358;1,600 per USD.
           </div>
 
           <div className="app-foot">
@@ -461,9 +461,15 @@ export default function SendPage() {
               Try {naira(suggest)} instead
             </button>
           )}
-          <Link className="app-link app-center" to="/app/verify">
-            Verify identity for a higher limit
-          </Link>
+          {code === 'INSUFFICIENT_BALANCE' ? (
+            <Link className="app-link app-center" to="/app/fund">
+              Fund private balance
+            </Link>
+          ) : (
+            <Link className="app-link app-center" to="/app/verify">
+              {code === 'NOT_IN_ALLOW_LIST' ? 'Verify identity' : 'Verify identity for a higher limit'}
+            </Link>
+          )}
         </div>
 
         <div className="app-foot">
@@ -476,5 +482,3 @@ export default function SendPage() {
     </div>
   )
 }
-
-

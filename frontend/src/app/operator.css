@@ -263,3 +263,20 @@
   font-size: 12px;
   color: #565B5F;
 }
+
+.op-head-links { display: flex; align-items: center; gap: 18px; }
+.op-col { display: flex; flex-direction: column; gap: 24px; }
+.op-login { max-width: 520px; }
+.op-field { display: grid; gap: 6px; margin-top: 14px; font-size: 13px; color: #565B5F; }
+.op-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1.5px solid #15181B;
+  border-radius: 8px;
+  background: #fff;
+  color: #15181B;
+  font-size: 14px;
+}
+.op-row-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.op-good { padding: 12px 14px; border: 1.5px solid #1E6B4B; border-radius: 8px; color: #1E6B4B; font-weight: 500; }

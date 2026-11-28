@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { stroopsToUsd } from '@clearance/sdk'
 import { useApp } from '../app/AppContext'
-import { DEMO_ADA, IS_MOCK, demoApproveUpgrade, usdToNaira } from '../sdk/mock'
-import type { Budget } from '../sdk/types'
-import { formatNaira, rulePacks } from '../data/content'
+import { addKycRequest, removeKycRequest, usdToNaira } from '../sdk/clearance'
+import type { Budget, Tier } from '../sdk/types'
+import { formatNaira } from '../data/content'
 import '../app/app.css'
 
 type Stage = 'intro' | 'waiting' | 'done'
@@ -16,42 +17,98 @@ export default function VerifyPage() {
   const navigate = useNavigate()
   const [stage, setStage] = useState<Stage>('intro')
   const [budget, setBudget] = useState<Budget | null>(null)
+  const [now, setNow] = useState<Tier | null>(null)
+  const [afterDaily, setAfterDaily] = useState<number | null>(null)
   const [error, setError] = useState('')
+  const [copied, setCopied] = useState(false)
+  const startTier = useRef<number>(0)
 
   useEffect(() => {
     if (!client) return
     let live = true
-    void client.getBudget().then((b) => {
-      if (live) setBudget(b)
-    })
+    void (async () => {
+      try {
+        const [b, t, pack] = await Promise.all([client.getBudget(), client.getTier(), client.getPack()])
+        if (!live) return
+        setBudget(b)
+        const cur = t ? t.tier : null
+        setNow(cur)
+        const next = Math.min((cur ?? 0) + 1, 3)
+        const row = pack.tiers[next - 1]
+        setAfterDaily(row ? stroopsToUsd(row[1]) : null)
+      } catch (e) {
+        console.error(e)
+      }
+    })()
     return () => {
       live = false
     }
   }, [client])
 
+  // While waiting: look for the tier the provider issues on chain.
+  useEffect(() => {
+    if (stage !== 'waiting' || !client) return
+    let live = true
+    const id = window.setInterval(() => {
+      void (async () => {
+        try {
+          const t = await client.getTier()
+          if (live && t && t.tier > startTier.current) {
+            window.clearInterval(id)
+            removeKycRequest(client.idCommitment)
+            setBudget(await client.getBudget())
+            setNow(t.tier)
+            setStage('done')
+          }
+        } catch (e) {
+          console.error(e)
+        }
+      })()
+    }, 4000)
+    return () => {
+      live = false
+      window.clearInterval(id)
+    }
+  }, [stage, client])
+
   if (!session) return <Navigate to="/app" replace />
 
   const last = history[0]
   const retryAmount = last && last.kind === 'not_sent' ? last.amountNgn : 28000
-  const tierLabel = 'Tier ' + (budget ? budget.tier : 1) + ' \u00B7 NGN'
-  const pack = rulePacks[0]
-  const tier2 = pack.tiers[1]
+  const tierLabel = now ? 'Tier ' + now + ' \u00B7 NGN' : 'Not verified'
+  const target = Math.min((now ?? 0) + 1, 3) as Tier
 
   async function start() {
     if (!client) return
     setError('')
-    setStage('waiting')
     try {
-      const req = await client.requestTierUpgrade()
-      if (!IS_MOCK) {
-        window.open(req.interactiveUrl, '_blank', 'width=480,height=720')
+      const t = await client.getTier()
+      const cur = t ? t.tier : 0
+      if (cur >= 3) {
+        setError('You are already at the highest tier.')
+        return
       }
-      await req.done
-      setBudget(await client.getBudget())
-      setStage('done')
+      startTier.current = cur
+      addKycRequest({
+        idCommitment: client.idCommitment,
+        name: session ? session.name : 'Customer',
+        tier: (cur + 1) as Tier,
+        at: new Date().toISOString(),
+      })
+      setStage('waiting')
+    } catch (e) {
+      console.error(e)
+      setError('Could not reach Stellar testnet. Nothing changed. Try again.')
+    }
+  }
+
+  async function copyRef() {
+    if (!client) return
+    try {
+      await navigator.clipboard.writeText(client.idCommitment)
+      setCopied(true)
     } catch {
-      setError('Verification did not finish. Nothing changed. Try again.')
-      setStage('intro')
+      /* ignore */
     }
   }
 
@@ -83,13 +140,16 @@ export default function VerifyPage() {
               <div className="app-row">
                 <span>Now</span>
                 <span>
-                  Tier {budget ? budget.tier : 1} &middot;{' '}
-                  {budget ? naira(toNgn(budget.dailyLimitUsd)) : '\u2014'} a day
+                  {now ? 'Tier ' + now : 'Not verified'} &middot;{' '}
+                  {budget && now ? naira(toNgn(budget.dailyLimitUsd)) : '\u2014'} a day
                 </span>
               </div>
               <div className="app-row app-row-top app-good">
                 <span>After</span>
-                <span>Tier 2 &middot; {tier2.daily} a day</span>
+                <span>
+                  Tier {target} &middot;{' '}
+                  {afterDaily !== null ? naira(toNgn(afterDaily)) : '\u2014'} a day
+                </span>
               </div>
             </div>
 
@@ -100,7 +160,8 @@ export default function VerifyPage() {
                 Verify identity
               </button>
               <span className="app-center-text">
-                Takes a few minutes. In this demo, about 3 seconds.
+                Takes a few minutes. Your provider checks your ID, then issues
+                your new level on Stellar.
               </span>
             </div>
           </>
@@ -135,17 +196,21 @@ export default function VerifyPage() {
               </div>
             </div>
 
-            {IS_MOCK && (
-              <div className="app-foot">
-                <button
-                  type="button"
-                  className="app-link app-center"
-                  onClick={() => demoApproveUpgrade(DEMO_ADA)}
-                >
-                  Demo mode: approve now
-                </button>
-              </div>
-            )}
+            <div className="app-note">
+              Your provider sees this reference:{' '}
+              <span className="mono">
+                {client ? client.idCommitment.slice(0, 8) + '\u2026' + client.idCommitment.slice(-6) : ''}
+              </span>{' '}
+              <button type="button" className="app-inline" onClick={() => void copyRef()}>
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+
+            <div className="app-foot">
+              <Link className="app-link app-center" to="/operator" target="_blank">
+                Provider view: open the operator console
+              </Link>
+            </div>
           </>
         )}
 
@@ -153,7 +218,7 @@ export default function VerifyPage() {
           <>
             <div className="app-result-head">
               <span className="stamp stamp-cleared">VERIFIED</span>
-              <h1 className="app-h1">You are now Tier {budget ? budget.tier : 2}.</h1>
+              <h1 className="app-h1">You are now Tier {now ?? (budget ? budget.tier : target)}.</h1>
             </div>
 
             <div className="app-panel app-rows mono">

@@ -3,10 +3,9 @@ import type { ReactNode } from 'react'
 import { StellarWalletsKit } from '@creit-tech/stellar-wallets-kit/sdk'
 import { FreighterModule } from '@creit-tech/stellar-wallets-kit/modules/freighter'
 import { AlbedoModule } from '@creit-tech/stellar-wallets-kit/modules/albedo'
-import { connectMock, createDemoWallet, DEMO_ADA } from '../sdk/mock'
+import { connectDemoAccount, connectLive, identityForWallet } from '../sdk/clearance'
+import type { Client } from '../sdk/clearance'
 import type { WalletLike } from '../sdk/types'
-
-type Client = Awaited<ReturnType<typeof connectMock>>
 
 interface Session {
   name: string
@@ -50,8 +49,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<Entry[]>([])
 
   const signIn = useCallback(async (name: string) => {
-    const wallet = await createDemoWallet(DEMO_ADA)
-    const c = await connectMock({ network: 'testnet', pool: 'CMOCKPOOL', wallet })
+    const c = await connectDemoAccount()
     setClient(c)
     setHistory([])
     setSession({ name })
@@ -69,7 +67,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return { signedTxXdr: r.signedTxXdr }
       },
     }
-    const c = await connectMock({ network: 'testnet', pool: 'CMOCKPOOL', wallet })
+    const c = await connectLive(wallet, identityForWallet())
     setClient(c)
     setHistory([])
     setSession({ name: address.slice(0, 4) + '\u2026' + address.slice(-4) })
@@ -102,4 +100,3 @@ export function useApp(): AppState {
   if (!v) throw new Error('useApp must be used inside AppProvider')
   return v
 }
-

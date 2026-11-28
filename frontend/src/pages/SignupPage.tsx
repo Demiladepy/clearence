@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../app/AppContext'
+import { errText, loadArtifacts, saveDemoCreds } from '../sdk/clearance'
 import '../app/app.css'
 
 export default function SignupPage() {
@@ -12,11 +13,43 @@ export default function SignupPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [setup, setSetup] = useState(false)
+  const [pendingName, setPendingName] = useState('Ada')
+  const [stellarSecret, setStellarSecret] = useState('')
+  const [identitySecret, setIdentitySecret] = useState('')
+
+  // Start fetching the proving files while the person fills in the form.
+  useEffect(() => {
+    loadArtifacts().catch(() => undefined)
+  }, [])
 
   async function enter(displayName: string) {
     setBusy(true)
-    await signIn(displayName)
-    navigate('/app/home')
+    setError('')
+    try {
+      await signIn(displayName)
+      navigate('/app/home')
+    } catch (e) {
+      if (e instanceof Error && e.message === 'NO_DEMO_CREDS') {
+        setPendingName(displayName)
+        setSetup(true)
+      } else {
+        console.error(e)
+        setError('Could not connect to Stellar testnet. Nothing changed. ' + errText(e))
+      }
+      setBusy(false)
+    }
+  }
+
+  async function saveAndEnter() {
+    if (!/^S[A-Z2-7]{55}$/.test(stellarSecret.trim()) || !identitySecret.trim()) {
+      setError('Paste both keys exactly as you received them.')
+      return
+    }
+    saveDemoCreds(stellarSecret, identitySecret)
+    setStellarSecret('')
+    setIdentitySecret('')
+    await enter(pendingName)
   }
 
   async function connect() {
@@ -65,6 +98,47 @@ export default function SignupPage() {
           <p className="app-sub">Send money privately, within your limit.</p>
         </div>
 
+        {setup && (
+          <div className="app-form">
+            <div className="app-note">
+              This demo account runs on Stellar testnet and needs its two keys
+              once. They are saved in this browser only.
+            </div>
+            <div className="app-field">
+              <label className="app-label" htmlFor="stellar">Account secret key (starts with S)</label>
+              <input
+                id="stellar"
+                className="app-input mono"
+                type="password"
+                autoComplete="off"
+                value={stellarSecret}
+                onChange={(e) => setStellarSecret(e.target.value)}
+              />
+            </div>
+            <div className="app-field">
+              <label className="app-label" htmlFor="identity">Identity secret</label>
+              <input
+                id="identity"
+                className="app-input mono"
+                type="password"
+                autoComplete="off"
+                value={identitySecret}
+                onChange={(e) => setIdentitySecret(e.target.value)}
+              />
+            </div>
+            {error && <div className="app-error" role="alert">{error}</div>}
+            <div className="app-actions">
+              <button className="app-btn" type="button" disabled={busy} onClick={() => void saveAndEnter()}>
+                {busy ? 'Connecting\u2026' : 'Save and continue'}
+              </button>
+              <button className="app-link" type="button" disabled={busy} onClick={() => setSetup(false)}>
+                Back
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!setup && (
         <form className="app-form" onSubmit={onSubmit} noValidate>
           <div className="app-field">
             <label className="app-label" htmlFor="name">Full name</label>
@@ -106,7 +180,7 @@ export default function SignupPage() {
 
           <div className="app-actions">
             <button className="app-btn" type="submit" disabled={busy}>
-              Create account
+              {busy ? 'Connecting\u2026' : 'Create account'}
             </button>
             <button
               className="app-btn app-btn-outline"
@@ -126,10 +200,11 @@ export default function SignupPage() {
             </button>
           </div>
         </form>
+        )}
 
         <div className="app-foot">
           <span>
-            Marigold is a fictional demo app. Nothing you enter is stored.
+            Marigold is a fictional demo app. Testnet only.
           </span>
           <span className="app-powered">
             <svg width="14" height="14" viewBox="0 0 26 26" aria-hidden="true">

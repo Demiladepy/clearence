@@ -14,5 +14,5 @@ export { ClearanceOperator, type OperatorOptions, type PackRules } from "./opera
 export { fetchArtifacts, ProofEngine, ConstraintError, type CircuitArtifacts, type ProofResult } from "./prover.js";
 export { initCrypto, packHash, idCommitment, operatorPublicKey, tierLeaf } from "./crypto.js";
 export { poolState, treeLeaves, activePack, extDataHash, type PoolState, type ActivePack, type SealedRecordEvent } from "./state.js";
-export { Chain } from "./chain.js";
+export { Chain, type ChainEvent, type EventArchive } from "./chain.js";
 export { keypairWallet } from "./wallets.js";

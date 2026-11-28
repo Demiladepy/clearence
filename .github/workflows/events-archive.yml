@@ -1,0 +1,43 @@
+# Keeps the testnet event archive (branch events-archive) ahead of the RPC's
+# ~7-day event retention. Wallets read it through the SDK's
+# Deployment.archiveUrl and check every tree against the on-chain root, so the
+# archive needs no trust, only freshness. scripts/archive-events.mjs fails
+# loudly (and this job goes red) if a gap ever opens.
+name: events-archive
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/archive-events.mjs
+      - .github/workflows/events-archive.yml
+      - deployments/testnet.json
+permissions:
+  contents: write
+concurrency: events-archive
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: events-archive
+          path: archive
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Append new events
+        run: node scripts/archive-events.mjs archive/testnet/events.json deployments/testnet.json
+      - name: Commit
+        working-directory: archive
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add testnet/events.json
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -q -m "testnet events to ledger $(node -p 'require("./testnet/events.json").toLedger')"
+          git push

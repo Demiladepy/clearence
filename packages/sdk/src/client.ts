@@ -250,6 +250,16 @@ export class ClearanceClient {
     } catch {
       const fb = await fetch(`https://friendbot.stellar.org/?addr=${encodeURIComponent(this.address)}`);
       if (!fb.ok) throw new Error(`friendbot could not fund ${this.address} (${fb.status})`);
+      // The RPC can be a ledger or two behind friendbot: wait until it sees the account.
+      for (let i = 0; ; i++) {
+        try {
+          await this.chain.server.getAccount(this.address);
+          break;
+        } catch (e) {
+          if (i >= 15) throw e;
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+      }
     }
     let trustlineTx: string | undefined;
     try {

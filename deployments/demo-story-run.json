@@ -1,34 +1,34 @@
 {
-  "ranAt": "2026-11-28T11:31:21.918Z",
-  "ada": "GCULE55TS7XCWNISHJKX6VRJ3L7BP3PU3EERF7T4ZKBRMDXADRWU2QE4",
+  "ranAt": "2026-11-28T18:48:21.454Z",
+  "ada": "GBTYIJRBLSAJWVN77ZPMUZD5HTF7TYQ6NVUHCQ6SPVFBDNKKD53ACG2B",
   "steps": [
     {
-      "step": "Ada GCULE55TS7XCWNISHJKX6VRJ3L7BP3PU3EERF7T4ZKBRMDXADRWU2QE4 and Bob created, NG tier 1"
+      "step": "Ada GBTYIJRBLSAJWVN77ZPMUZD5HTF7TYQ6NVUHCQ6SPVFBDNKKD53ACG2B and Bob created, NG tier 1"
     },
     {
       "step": "Ada funds NGN 60,000",
-      "tx": "23621cae1a9835b6e14add136e74139b737472d2869d72df5df5da21a8feded8",
-      "provingMs": 9014
+      "tx": "fec6f51361d2a2215244bf5be4ad55301a207fb5b8c41ccab93980581403f174",
+      "provingMs": 9348
     },
     {
       "step": "Ada sends NGN 25,000 to Bob",
-      "tx": "90794b2e3a00c7cdab04291bcfbf523e75b61163fa9db78c32059542e3d4e696",
-      "provingMs": 8367
+      "tx": "531b5d5e32e80d46a9b65a9879ec8a268d4775aeac5afd52a3fecbd4b30b2aef",
+      "provingMs": 9748
     },
     {
       "step": "NGN 28,000 refused: OVER_DAILY_BUDGET (no transaction)"
     },
     {
       "step": "NG operator issues Ada tier 2",
-      "tx": "f2bd8e4596828380c7954b9e1abba9c5e7db833891a91ff3676964d9c047070f"
+      "tx": "e9a0a52b4b77b53f9c025f05c3976d06809ca4f3fe1b26e7ce45336736d3018f"
     },
     {
       "step": "Ada sends NGN 28,000 again (tier 2)",
-      "tx": "1458eb8c84b75742841f7e66bddec49cabfbcf1eaa0ed25e8f68eee1a96bb732",
-      "provingMs": 8765
+      "tx": "f159603c546bbe4f3bfa17eadf5bc1c1e3d3f899788132a7f54e29db65cda5fa",
+      "provingMs": 9165
     },
     {
-      "step": "NG operator opens record 0025633936780591104-0000000006: sender = Ada, NGN 28,000"
+      "step": "NG operator opens record 0025656459589091328-0000000006: sender = Ada, NGN 28,000"
     }
   ]
 }

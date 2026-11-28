@@ -61,7 +61,14 @@ Stellar Wallets Kit already fit.
 about 9 s from click to verified on-chain.
 
 Errors are the same `ClearanceError` codes (`OVER_PER_PAYMENT_LIMIT`, `OVER_DAILY_BUDGET`,
-`NOT_IN_ALLOW_LIST`, `INSUFFICIENT_BALANCE`, `WALLET_REJECTED`, `RECORD_KEY_INVALID`).
+`NOT_IN_ALLOW_LIST`, `INSUFFICIENT_BALANCE`, `WALLET_REJECTED`, `RECORD_KEY_INVALID`), plus two
+for chain history (0.1.2): `HISTORY_UNAVAILABLE` (the history needed is past the RPC's 7 days and
+the archive could not be reached: show "try again shortly") and `STATE_MISMATCH` (the rebuilt
+state did not match the chain: show "refresh"). Nothing is sent in either case.
+
+The RPC keeps only about 7 days of events, so the SDK reads older ones from the event archive
+(`TESTNET.archiveUrl`) and checks every tree against the on-chain root. Nothing to do in the UI;
+see [architecture/history.md](architecture/history.md).
 
 ### Limits: read them, don't hardcode them
 

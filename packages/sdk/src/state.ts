@@ -7,8 +7,9 @@ import { Buffer } from "buffer";
 import { Address, xdr, nativeToScVal } from "@stellar/stellar-sdk";
 import { keccak_256 } from "@noble/hashes/sha3";
 import type { Chain, ChainEvent } from "./chain.js";
-import { P, type F, type PackValues, packHash } from "./crypto.js";
-import type { Deployment } from "./config.js";
+import { P, type F, type PackValues, packHash, listTreeRoot, noteTreeRoot } from "./crypto.js";
+import { LEVELS, type Deployment } from "./config.js";
+import { ClearanceError } from "./errors.js";
 
 export interface BudgetStep {
   nullifier: F;
@@ -49,12 +50,24 @@ export interface PoolState {
 const s = (v: unknown): F => BigInt(v as bigint | number | string).toString();
 const name = (e: ChainEvent): string => String(e.topics[0]);
 
-/** Leaves of an asp-membership tree, in index order, from LeafAdded events. */
+/**
+ * A tree rebuilt from events (archive and RPC) must hash to a root the
+ * contract knows; otherwise an event is missing, altered or invented.
+ * Checked against the root history, so a leaf added meanwhile is no problem.
+ */
+async function checkRoot(chain: Chain, id: string, root: F, empty: boolean): Promise<void> {
+  if (empty) return; // the contracts never report the zero tree's root as known
+  if (!(await chain.read<boolean>(id, "is_known_root", { root: BigInt(root) }))) throw new ClearanceError("STATE_MISMATCH");
+}
+
+/** Leaves of an asp-membership tree, in index order, from LeafAdded events; checked against its root. */
 export async function treeLeaves(chain: Chain, id: string): Promise<F[]> {
   const evs = (await chain.events([id])).filter((e) => name(e) === "LeafAdded");
   const leaves: F[] = [];
   for (const e of evs) leaves[Number(e.data.index)] = s(e.data.leaf);
-  if (leaves.some((l) => l === undefined) || leaves.length !== evs.length) throw new Error(`gap in tree ${id}`);
+  if (leaves.some((l) => l === undefined) || leaves.length !== evs.length) throw new ClearanceError("STATE_MISMATCH");
+  const depth = id === chain.d.budgetTree ? LEVELS.budget : LEVELS.identity;
+  await checkRoot(chain, id, listTreeRoot(leaves, depth), leaves.length === 0);
   return leaves;
 }
 
@@ -102,7 +115,8 @@ export async function poolState(chain: Chain, d: Deployment): Promise<PoolState>
         break;
     }
   }
-  if (notes.some((n) => n === undefined)) throw new Error("gap in note tree events");
+  if (notes.some((n) => n === undefined)) throw new ClearanceError("STATE_MISMATCH");
+  await checkRoot(chain, d.pool, noteTreeRoot(notes.map((n) => n.commitment), LEVELS.pool), notes.length === 0);
   return { notes, nullifiers, budgetSteps, budgetLeaves, records };
 }
 

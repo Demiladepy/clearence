@@ -9,6 +9,12 @@ export interface Deployment {
   networkPassphrase: string;
   /** First ledger to scan for events (the deployment's start ledger). */
   startLedger: number;
+  /**
+   * Event archive (scripts/archive-events.mjs) covering ledgers the RPC no
+   * longer keeps (~7 days on testnet). Untrusted: every tree rebuilt from it is
+   * checked against the contract's root. Omit to read the RPC only.
+   */
+  archiveUrl?: string;
   pool: string;
   token: string;
   /** Classic asset behind the token contract (code:issuer), for trustlines. */
@@ -23,6 +29,7 @@ export const TESTNET: Deployment = {
   rpcUrl: "https://soroban-testnet.stellar.org",
   networkPassphrase: Networks.TESTNET,
   startLedger: 5951900,
+  archiveUrl: "https://raw.githubusercontent.com/Demiladepy/clearence/events-archive/testnet/events.json",
   pool: "CA2DGBLA6H2Q6W4JOHOT2UGXEWIJVQSNFDB2GN3PQSZRUNEBDNJOTIQE",
   token: "CCXZ5OWSDPXDGL7CAN7CDYVATYPSHXDTRZAWQLWGT3I4QZ62F3MRIRZ3",
   asset: { code: "CLRUSD", issuer: "GB5HAJ2FBMUR6NMQG7EH2A4OFA5F7K4ZIIKW6OTMWZDIA66ROL4QIBZJ" },

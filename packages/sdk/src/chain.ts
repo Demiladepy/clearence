@@ -6,6 +6,17 @@
 import { Asset, BASE_FEE, Operation, TransactionBuilder, contract, rpc, scValToNative, xdr } from "@stellar/stellar-sdk";
 import type { Deployment } from "./config.js";
 import type { WalletLike } from "./types.js";
+import { ClearanceError } from "./errors.js";
+
+/** The file scripts/archive-events.mjs writes. */
+export interface EventArchive {
+  networkPassphrase: string;
+  startLedger: number;
+  /** Every event of `contracts` in [startLedger, toLedger] is included. */
+  toLedger: number;
+  contracts: string[];
+  events: { id: string; ledger: number; txHash: string; contractId: string; topic: string[]; value: string }[];
+}
 
 export interface ChainEvent {
   id: string;
@@ -36,16 +47,22 @@ export class Chain {
     this.server = new rpc.Server(d.rpcUrl, { allowHttp: d.rpcUrl.startsWith("http://") });
   }
 
-  private client(id: string): Promise<contract.Client> {
-    let c = this.clients.get(id);
+  /**
+   * `signer` false: a client with no source account, for reads. Simulation
+   * then needs no account on chain, so a visitor whose account does not exist
+   * yet can still read (getTier before onboarding).
+   */
+  private client(id: string, signer = true): Promise<contract.Client> {
+    const key = signer ? id : `read:${id}`;
+    let c = this.clients.get(key);
     if (!c) {
-      const wallet = this.wallet;
+      const wallet = signer ? this.wallet : undefined;
       c = contract.Client.from({
         contractId: id,
         rpcUrl: this.d.rpcUrl,
         networkPassphrase: this.d.networkPassphrase,
         allowHttp: this.d.rpcUrl.startsWith("http://"),
-        ...(this.source ? { publicKey: this.source } : {}),
+        ...(signer && this.source ? { publicKey: this.source } : {}),
         ...(wallet
           ? {
               signTransaction: async (txXdr: string, opts?: { networkPassphrase?: string }) =>
@@ -53,14 +70,14 @@ export class Chain {
             }
           : {}),
       });
-      this.clients.set(id, c);
+      this.clients.set(key, c);
     }
     return c;
   }
 
   /** Read-only call (simulated against current ledger state). */
   async read<T>(id: string, fn: string, args: Record<string, unknown> = {}): Promise<T> {
-    const c = (await this.client(id)) as unknown as Record<string, (a: unknown) => Promise<contract.AssembledTransaction<unknown>>>;
+    const c = (await this.client(id, false)) as unknown as Record<string, (a: unknown) => Promise<contract.AssembledTransaction<unknown>>>;
     const method = c[fn];
     if (!method) throw new Error(`${id} has no method ${fn}`);
     const tx = await method.call(c, args);
@@ -83,25 +100,50 @@ export class Chain {
     return { hash, ledger: res.ledger, result: unwrap(sent.result) };
   }
 
-  /** All events of `ids` from the deployment's start ledger, in order. */
+  /**
+   * All events of `ids` from the deployment's start ledger, in order: from the
+   * event archive for ledgers it covers, then from the RPC for the rest. The
+   * RPC keeps only ~7 days of events, so without an archive older state is
+   * gone (HISTORY_UNAVAILABLE).
+   */
   async events(ids: string[], startLedger = this.d.startLedger): Promise<ChainEvent[]> {
     const out: ChainEvent[] = [];
+    const seen = new Set<string>();
+    const push = (e: ChainEvent) => {
+      if (!seen.has(e.id)) {
+        seen.add(e.id);
+        out.push(e);
+      }
+    };
+    let from = startLedger;
+    const a = await this.archive();
+    if (a && a.startLedger <= startLedger && ids.every((id) => a.contracts.includes(id))) {
+      for (const e of a.events) {
+        if (e.ledger < startLedger || !ids.includes(e.contractId)) continue;
+        push(decodeEvent(e.id, e.ledger, e.txHash, e.contractId, e.topic.map((t) => xdr.ScVal.fromXDR(t, "base64")), xdr.ScVal.fromXDR(e.value, "base64")));
+      }
+      from = Math.max(from, a.toLedger + 1);
+    }
+
     let cursor: string | undefined;
     for (;;) {
       const req: rpc.Server.GetEventsRequest = cursor
         ? { cursor, filters: [{ type: "contract", contractIds: ids }], limit: 1000 }
-        : { startLedger, filters: [{ type: "contract", contractIds: ids }], limit: 1000 };
-      const page = await this.server.getEvents(req);
-      for (const e of page.events) {
-        out.push({
-          id: e.id,
-          ledger: e.ledger,
-          txHash: e.txHash,
-          contractId: e.contractId?.toString() ?? "",
-          topics: e.topic.map((t: xdr.ScVal) => scValToNative(t)),
-          data: (scValToNative(e.value) ?? {}) as Record<string, unknown>,
-        });
+        : { startLedger: from, filters: [{ type: "contract", contractIds: ids }], limit: 1000 };
+      let page: rpc.Api.GetEventsResponse;
+      try {
+        page = await this.server.getEvents(req);
+      } catch (e) {
+        if (cursor) throw e;
+        // The start ledger is outside what the RPC holds: either the archive is
+        // already ahead of its latest ledger (nothing newer to read), or the
+        // range is older than its retention and no archive covers it.
+        const { oldestLedger, latestLedger } = await this.server.getHealth();
+        if (from > latestLedger) break;
+        if (from < oldestLedger) throw new ClearanceError("HISTORY_UNAVAILABLE");
+        throw e;
       }
+      for (const e of page.events) push(decodeEvent(e.id, e.ledger, e.txHash, e.contractId?.toString() ?? "", e.topic, e.value));
       // The RPC scans a bounded ledger window per request, so a short page is
       // not the end: keep going until the cursor reaches the latest ledger.
       // (A cursor is a TOID: the ledger sequence is its top 32 bits.)
@@ -110,7 +152,33 @@ export class Chain {
       if (page.events.length < 1000 && scannedTo >= page.latestLedger) break;
       cursor = page.cursor;
     }
-    return out;
+    return out.sort((x, y) => (x.id < y.id ? -1 : x.id > y.id ? 1 : 0));
+  }
+
+  private archiveCache?: { at: number; p: Promise<EventArchive | null> };
+  /** The deployment's event archive, fetched at most once a minute; null if none or unreachable. */
+  archive(): Promise<EventArchive | null> {
+    const url = this.d.archiveUrl;
+    if (!url) return Promise.resolve(null);
+    if (this.archiveCache && Date.now() - this.archiveCache.at < 60_000) return this.archiveCache.p;
+    const p = (async () => {
+      for (let i = 1; i <= 3; i++) {
+        try {
+          const r = await fetch(url, { cache: "no-store" });
+          if (r.status === 404) return null;
+          if (!r.ok) throw new Error(`archive: HTTP ${r.status}`);
+          const a = (await r.json()) as EventArchive;
+          return a.networkPassphrase === this.d.networkPassphrase ? a : null;
+        } catch {
+          // A dropped connection or a server hiccup: try again before giving up.
+          if (i < 3) await new Promise((res) => setTimeout(res, 500 * i));
+        }
+      }
+      this.archiveCache = undefined; // do not remember a failure
+      return null; // unreachable: fall back to the RPC alone
+    })();
+    this.archiveCache = { at: Date.now(), p };
+    return p;
   }
 
   /** Classic changeTrust for `code:issuer`, signed by the wallet, sent via RPC. */
@@ -132,6 +200,17 @@ export class Chain {
   async latestLedger(): Promise<number> {
     return (await this.server.getLatestLedger()).sequence;
   }
+}
+
+function decodeEvent(id: string, ledger: number, txHash: string, contractId: string, topic: xdr.ScVal[], value: xdr.ScVal): ChainEvent {
+  return {
+    id,
+    ledger,
+    txHash,
+    contractId,
+    topics: topic.map((t) => scValToNative(t)),
+    data: (scValToNative(value) ?? {}) as Record<string, unknown>,
+  };
 }
 
 /** contract.Client wraps contract `Result`s; unwrap them and throw on `Err`. */

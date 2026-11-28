@@ -1,0 +1,17 @@
+{
+  "ranAt": "2026-11-28T18:46:26.615Z",
+  "archive": {
+    "startLedger": 5951900,
+    "toLedger": 5973563,
+    "events": 235
+  },
+  "rpcCutoffLedger": 5973543,
+  "notes": 54,
+  "depositTx": "70edee5da1d338547b3b17dbbefc7391db912a20340802396b3070bec02cde22",
+  "paymentTx": "29d106445bebefe5f3271f04a28c04d434a7ad049b7d579f0adbc2b048f6e33f",
+  "refused": [
+    "HISTORY_UNAVAILABLE (no archive)",
+    "STATE_MISMATCH (altered allow-list leaf)",
+    "STATE_MISMATCH (swapped note commitments)"
+  ]
+}

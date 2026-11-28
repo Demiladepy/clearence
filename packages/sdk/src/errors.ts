@@ -6,7 +6,11 @@ export type ClearanceErrorCode =
   | "PROOF_TIMEOUT"
   | "WALLET_REJECTED"
   | "INSUFFICIENT_BALANCE"
-  | "RECORD_KEY_INVALID";
+  | "RECORD_KEY_INVALID"
+  /** Events needed to rebuild state are older than the RPC keeps and no archive covers them. */
+  | "HISTORY_UNAVAILABLE"
+  /** A tree rebuilt from events does not match any recent on-chain root (archive or RPC data is wrong). */
+  | "STATE_MISMATCH";
 
 export interface ErrorContext {
   /** Formatted local-currency figure, e.g. "₦50,000". */
@@ -51,5 +55,9 @@ export function humanMessage(code: ClearanceErrorCode, c: ErrorContext = {}): st
       return "Your private balance is too low for this payment. Deposit first.";
     case "RECORD_KEY_INVALID":
       return "This key cannot open the record. Only the operator key for this pool can.";
+    case "HISTORY_UNAVAILABLE":
+      return "We can't load the pool's full history right now. Nothing was sent. Please try again shortly.";
+    case "STATE_MISMATCH":
+      return "The pool history we loaded doesn't match the chain. Nothing was sent. Please refresh and try again.";
   }
 }

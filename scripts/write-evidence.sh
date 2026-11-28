@@ -89,6 +89,15 @@ if os.path.exists(ob):
     print(f"**Onboarding service** ({r['ranAt']}, `make test-onboarding`): a brand-new visitor to a funded, KYC'd account in {r['onboardMs']} ms: "
           f"trustline {tx('trustlineTx')}, KYC {tx('kycTx')}, grant {tx('mintTx')}, then a private deposit {tx('depositTx')}. "
           f"Refused as expected: {', '.join(r['refused'])}.\n")
+hr = f"{d}/history-run.json"
+if os.path.exists(hr):
+    r = json.load(open(hr))
+    tx = lambda k: f"[{r[k][:10]}...](https://stellar.expert/explorer/testnet/tx/{r[k]})"
+    a = r["archive"]
+    print(f"**Past the RPC's 7-day retention** ({r['ranAt']}, `make test-history`): with the RPC refusing every ledger before {r['rpcCutoffLedger']}, "
+          f"the event archive ({a['events']} events, ledgers {a['startLedger']}-{a['toLedger']}) plus the RPC tail rebuilt the same {r['notes']} notes, nullifiers, budget and allow-list trees as the full RPC, "
+          f"and a new user paid privately: deposit {tx('depositTx')}, payment {tx('paymentTx')}. "
+          f"Refused as expected: {', '.join(r['refused'])}.\n")
 da = f"{d}/demo-accounts.json"
 if os.path.exists(da):
     r = json.load(open(da))

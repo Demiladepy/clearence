@@ -5,13 +5,14 @@
 UP := upstream/nethermind-spp
 EVIDENCE := docs/evidence
 
-.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo sdk-assets test-sdk-testnet test-sdk-browser demo-accounts test-demo-story test-onboarding onboarding-server test test-contracts test-circuits test-e2e test-sdk verify evidence
+.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo sdk-assets test-sdk-testnet test-sdk-browser demo-accounts test-demo-story test-onboarding test-history onboarding-server test test-contracts test-circuits test-e2e test-sdk verify evidence
 
 help:
 	@echo "make setup          init the pinned upstream submodule"
 	@echo "make circuits       sync + compile all circuits (incl. test circuits)"
 	@echo "make test           contract + circuit + SDK tests"
 	@echo "make verify         full rebuild + all tests + write docs/evidence/"
+	@echo "make test-history   payments past the RPC's 7-day retention via the event archive (testnet)"
 	@echo "make wasm           build the four contract WASMs (verifier embeds clearance_tx_2_2's key)"
 	@echo "make deploy-testnet wasm + deploy everything to testnet (scripts/deploy-testnet.py)"
 
@@ -71,6 +72,9 @@ test-sdk-testnet:
 
 test-demo-story:
 	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} npx tsx --test test/demo-story.test.ts
+
+test-history:
+	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} npx tsx --test test/history.test.ts
 
 test-onboarding:
 	cd packages/sdk && pnpm build >/dev/null

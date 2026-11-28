@@ -1,42 +1,63 @@
 {
-  "ranAt": "2026-11-27T15:01:04.470Z",
+  "ranAt": "2026-11-28T11:33:18.739Z",
   "accounts": [
     {
       "name": "Ada (demo)",
       "jurisdiction": "NG",
-      "stellarAddress": "GAW66MEJJNB5NTAGMJG6X4AXZYL6H2CUAYLFHIRKTT7FIZM4DPXXU6XH",
-      "clearanceAddress": "clr:9913087533184529592469243143663795238890786136124557876375230318463487382182:132ae0649187867e7283077f415e55571e75f5680b03ee4a95024c5b6c49fd4d",
+      "stellarAddress": "GCESTHT4UJSUJE3DLLFZQDIR65MGKYRQUOM4ZQKVD3JUEYDV2ESSI5G4",
+      "clearanceAddress": "clr:17856029040546774516170670349174308826920886007596162340531171581950728758448:d5804e3f2622a34b2fdf6aac1de92a13110568cd9f1c5e662b5667bf5ced6074",
       "tier": 1,
-      "publicClrusd": 180,
-      "privateBalanceUsd": 20,
+      "publicClrusd": 200,
+      "privateBalanceUsd": 0,
       "budget": {
         "tier": 1,
         "spentTodayUsd": 0,
         "dailyLimitUsd": 31.25,
         "perPaymentLimitUsd": 18.75,
-        "resetsAt": "2026-11-27T23:00:00.000Z"
+        "resetsAt": "2026-11-28T23:00:00.000Z"
       },
       "steps": {
         "trustline": {
-          "tx": "26377c105b7c69692d4145faf49e63493e458ef64ea53532ce7a5b6367bacdf5",
-          "explorer": "https://stellar.expert/explorer/testnet/tx/26377c105b7c69692d4145faf49e63493e458ef64ea53532ce7a5b6367bacdf5"
+          "tx": "a20445e6d38bb7c128c0baa936fbbba3ec1de2f9d99415bff0ccfbf22690f32b",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/a20445e6d38bb7c128c0baa936fbbba3ec1de2f9d99415bff0ccfbf22690f32b"
         },
         "kyc": {
-          "tx": "6852d19c206bf4ea0c81686a6743ec5a434449a9c776c0162539383351616ea7",
-          "explorer": "https://stellar.expert/explorer/testnet/tx/6852d19c206bf4ea0c81686a6743ec5a434449a9c776c0162539383351616ea7"
+          "tx": "a1dcc5daf1144d5eb1c01ce082c53f46a17f7af43db1cf0b15f38406eecd4072",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/a1dcc5daf1144d5eb1c01ce082c53f46a17f7af43db1cf0b15f38406eecd4072"
+        }
+      }
+    },
+    {
+      "name": "Bob (demo)",
+      "jurisdiction": "NG",
+      "stellarAddress": "GC2AH52DCUEWFUS4BQWDS7ND3HKPCVNHIWFRKTLA6LMWOXDYTMSQP722",
+      "clearanceAddress": "clr:8349537337826083827003494516607764824265985743244025152328549740189481670642:070cbcaf7db0266d36f3812e61c05df658d39e0bd96190bf6682bd511ff38761",
+      "tier": 1,
+      "publicClrusd": 0,
+      "privateBalanceUsd": 0,
+      "budget": {
+        "tier": 1,
+        "spentTodayUsd": 0,
+        "dailyLimitUsd": 31.25,
+        "perPaymentLimitUsd": 18.75,
+        "resetsAt": "2026-11-28T23:00:00.000Z"
+      },
+      "steps": {
+        "trustline": {
+          "tx": "0767943f56917d80c435c9d405c00802a7dbe108a74e4c0fb2c90978dc3c5a44",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/0767943f56917d80c435c9d405c00802a7dbe108a74e4c0fb2c90978dc3c5a44"
         },
-        "deposit20": {
-          "tx": "7f12a9bc5fa3c821a1e0c3dedc97de26073cbbe37fd47f434a7aba9f510636c3",
-          "explorer": "https://stellar.expert/explorer/testnet/tx/7f12a9bc5fa3c821a1e0c3dedc97de26073cbbe37fd47f434a7aba9f510636c3",
-          "provingMs": 6722
+        "kyc": {
+          "tx": "4de48b9f365624d2d340458ef7ca1f32d11b7f646cea53be98332058a99ae981",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/4de48b9f365624d2d340458ef7ca1f32d11b7f646cea53be98332058a99ae981"
         }
       }
     },
     {
       "name": "Kofi (demo)",
       "jurisdiction": "GH",
-      "stellarAddress": "GAMZFEK5HRKJMAMJO244ROOE3MFNLYR5GS357E4ZVPBXYUFK2NL37GLC",
-      "clearanceAddress": "clr:7600875842942481122511770653523116744408533769051511824914663485847463305137:71e76be3cf81c4fb004a398ce4e5549968e033013f1d11b6b15a13d5561fae0c",
+      "stellarAddress": "GDER5DO2OQJTQZ3UM66DDBYHOK3MTHVD52AUXZSY6ZMOZMUTAYVJWFGY",
+      "clearanceAddress": "clr:4400970161338321136762540858496953809655389229501479066738507240251184117907:f7411d2788a25a54db17398d59c0c850af2ab6c2d6d7e49e5d8e716bfc986179",
       "tier": 1,
       "publicClrusd": 20,
       "privateBalanceUsd": 0,
@@ -45,16 +66,16 @@
         "spentTodayUsd": 0,
         "dailyLimitUsd": 25,
         "perPaymentLimitUsd": 15,
-        "resetsAt": "2026-11-28T00:00:00.000Z"
+        "resetsAt": "2026-11-29T00:00:00.000Z"
       },
       "steps": {
         "trustline": {
-          "tx": "7f08af18b54ae8dcd987946e1d753effbef2ccb19e07c3f49fada517deff8494",
-          "explorer": "https://stellar.expert/explorer/testnet/tx/7f08af18b54ae8dcd987946e1d753effbef2ccb19e07c3f49fada517deff8494"
+          "tx": "75a6736f6c347ab1c6ca79f4758e015e9d114ac3c014fe1cdd253f5c630787b1",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/75a6736f6c347ab1c6ca79f4758e015e9d114ac3c014fe1cdd253f5c630787b1"
         },
         "kyc": {
-          "tx": "aad3e692e4160ec69e3699650e81f7ec24fdcf763e84aa787cacbf299d787693",
-          "explorer": "https://stellar.expert/explorer/testnet/tx/aad3e692e4160ec69e3699650e81f7ec24fdcf763e84aa787cacbf299d787693"
+          "tx": "ddd87f780053db2ae2213df1e95035d76bc963534a5a4a734647866aae4500c7",
+          "explorer": "https://stellar.expert/explorer/testnet/tx/ddd87f780053db2ae2213df1e95035d76bc963534a5a4a734647866aae4500c7"
         }
       }
     }

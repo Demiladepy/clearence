@@ -5,7 +5,7 @@
 UP := upstream/nethermind-spp
 EVIDENCE := docs/evidence
 
-.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo sdk-assets test-sdk-testnet test-sdk-browser demo-accounts test test-contracts test-circuits test-e2e test-sdk verify evidence
+.PHONY: help setup sync circuits wasm deploy-testnet testnet-demo sdk-assets test-sdk-testnet test-sdk-browser demo-accounts test-demo-story test test-contracts test-circuits test-e2e test-sdk verify evidence
 
 help:
 	@echo "make setup          init the pinned upstream submodule"
@@ -67,6 +67,9 @@ sdk-assets: circuits
 # identities and .secrets/ (see docs/sdk.md); in this container, the relay.
 test-sdk-testnet:
 	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} pnpm test:testnet
+
+test-demo-story:
+	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} npx tsx --test test/demo-story.test.ts
 
 demo-accounts:
 	cd packages/sdk && CLEARANCE_RPC=$${CLEARANCE_RPC:-https://soroban-testnet.stellar.org} npx tsx test/provision-demo.ts

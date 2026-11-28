@@ -1,0 +1,34 @@
+{
+  "ranAt": "2026-11-28T11:31:21.918Z",
+  "ada": "GCULE55TS7XCWNISHJKX6VRJ3L7BP3PU3EERF7T4ZKBRMDXADRWU2QE4",
+  "steps": [
+    {
+      "step": "Ada GCULE55TS7XCWNISHJKX6VRJ3L7BP3PU3EERF7T4ZKBRMDXADRWU2QE4 and Bob created, NG tier 1"
+    },
+    {
+      "step": "Ada funds NGN 60,000",
+      "tx": "23621cae1a9835b6e14add136e74139b737472d2869d72df5df5da21a8feded8",
+      "provingMs": 9014
+    },
+    {
+      "step": "Ada sends NGN 25,000 to Bob",
+      "tx": "90794b2e3a00c7cdab04291bcfbf523e75b61163fa9db78c32059542e3d4e696",
+      "provingMs": 8367
+    },
+    {
+      "step": "NGN 28,000 refused: OVER_DAILY_BUDGET (no transaction)"
+    },
+    {
+      "step": "NG operator issues Ada tier 2",
+      "tx": "f2bd8e4596828380c7954b9e1abba9c5e7db833891a91ff3676964d9c047070f"
+    },
+    {
+      "step": "Ada sends NGN 28,000 again (tier 2)",
+      "tx": "1458eb8c84b75742841f7e66bddec49cabfbcf1eaa0ed25e8f68eee1a96bb732",
+      "provingMs": 8765
+    },
+    {
+      "step": "NG operator opens record 0025633936780591104-0000000006: sender = Ada, NGN 28,000"
+    }
+  ]
+}

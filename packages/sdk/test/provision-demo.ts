@@ -5,9 +5,12 @@
  *   CLEARANCE_RPC=http://127.0.0.1:8000 NODE_USE_ENV_PROXY=1 npx tsx test/provision-demo.ts
  *
  * Creates:
- *   - "Ada (demo)", NG payer: XLM from friendbot, CLRUSD trustline, 200 CLRUSD,
- *     NG tier 1 issued on-chain, 20 USD already deposited into the pool.
- *   - "Kofi (demo)", GH receiver: XLM, CLRUSD trustline, 20 CLRUSD, GH tier 1.
+ *   - "Ada (demo)", NG payer: XLM from friendbot, CLRUSD trustline, 200 CLRUSD
+ *     public, NG tier 1 issued on-chain, nothing in the pool yet (the demo
+ *     starts with "fund").
+ *   - "Bob (demo)", NG recipient: XLM, CLRUSD trustline, NG tier 1.
+ *   - "Kofi (demo)", GH recipient (cross-border): XLM, trustline, 20 CLRUSD, GH tier 1.
+ * The story this supports is run end to end by test/demo-story.test.ts.
  * Secrets (Stellar secret key + Clearance identity secret) go to
  * .secrets/demo-accounts.json (gitignored). Public data and the transaction
  * hashes go to deployments/demo-accounts.json.
@@ -39,7 +42,7 @@ async function account(name: string, jurisdiction: "NG" | "GH", mintUsd: number,
   saveSecret({ name, jurisdiction, stellarAddress: kp.publicKey(), stellarSecret: kp.secret(), identitySecret });
   const client = await ClearanceClient.connect({ wallet: keypairWallet(kp.secret()), identitySecret, jurisdiction, artifacts, deployment: d });
   const trust = await client.addTokenTrustline();
-  execFileSync(join(root, "scripts/fund-demo-account.sh"), [kp.publicKey(), String(mintUsd)]);
+  if (mintUsd > 0) execFileSync(join(root, "scripts/fund-demo-account.sh"), [kp.publicKey(), String(mintUsd)], { stdio: "ignore" });
   const kyc = await op.issueTier({ idCommitment: client.idCommitment, tier: 1 });
   assert.deepEqual(await client.getTier(), { tier: 1, revoked: false });
   console.log(name, kp.publicKey(), "trustline", trust.txHash, "kyc", kyc.txHash);
@@ -58,14 +61,11 @@ const ng = await ClearanceOperator.connect({ wallet: keypairWallet(secret("clr-n
 const gh = await ClearanceOperator.connect({ wallet: keypairWallet(secret("clr-gh")), jurisdiction: "GH", recordKey: recordKey("gh"), deployment: d });
 
 const ada = await account("Ada (demo)", "NG", 200, ng);
+const bob = await account("Bob (demo)", "NG", 0, ng);
 const kofi = await account("Kofi (demo)", "GH", 20, gh);
 
-const dep = await ada.client.deposit(20);
-ada.steps.deposit20 = { ...tx(dep.txHash), provingMs: dep.provingMs };
-assert.equal((await ada.client.getBalance()).shieldedUsd, 20);
-
 const out = [];
-for (const a of [ada, kofi]) {
+for (const a of [ada, bob, kofi]) {
   const budget = await a.client.getBudget();
   const state = {
     name: a.name,

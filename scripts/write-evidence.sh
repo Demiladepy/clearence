@@ -73,6 +73,15 @@ if os.path.exists(nu):
     print(f"**Brand-new user** ({r['ranAt']}): trustline [{r['trustlineTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['trustlineTx']}), "
           f"KYC [{r['kycTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['kycTx']}), "
           f"first deposit [{r['depositTx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{r['depositTx']}) ({r['provingMs']} ms proving).\n")
+st = f"{d}/demo-story-run.json"
+if os.path.exists(st):
+    r = json.load(open(st))
+    print(f"**The demo story, end to end** ({r['ranAt']}, `make test-demo-story`, fresh accounts):\n")
+    print("| Step | Transaction | Proving |\n|---|---|---:|")
+    for x in r["steps"]:
+        t = f"[{x['tx'][:10]}...](https://stellar.expert/explorer/testnet/tx/{x['tx']})" if x.get("tx") else "none"
+        print(f"| {x['step']} | {t} | {str(x['provingMs']) + ' ms' if x.get('provingMs') else ''} |")
+    print()
 da = f"{d}/demo-accounts.json"
 if os.path.exists(da):
     r = json.load(open(da))

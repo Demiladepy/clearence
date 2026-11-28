@@ -1,6 +1,6 @@
 {
   "name": "@clearance/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Clearance SDK: Travel-Rule-ready private payments on Stellar",
   "type": "module",
   "main": "./dist/index.js",

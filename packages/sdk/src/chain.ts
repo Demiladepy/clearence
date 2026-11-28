@@ -102,7 +102,12 @@ export class Chain {
           data: (scValToNative(e.value) ?? {}) as Record<string, unknown>,
         });
       }
-      if (page.events.length < 1000) break;
+      // The RPC scans a bounded ledger window per request, so a short page is
+      // not the end: keep going until the cursor reaches the latest ledger.
+      // (A cursor is a TOID: the ledger sequence is its top 32 bits.)
+      if (!page.cursor) break;
+      const scannedTo = Number(BigInt(page.cursor.split("-")[0]!) >> 32n);
+      if (page.events.length < 1000 && scannedTo >= page.latestLedger) break;
       cursor = page.cursor;
     }
     return out;

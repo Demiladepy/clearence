@@ -233,7 +233,7 @@ mod tests {
         receiver_pk: Scalar,
         change_pk: Option<Scalar>, // override: change to someone else
         withdrawal: u64,
-        deposit: u64,         // public amount in; this circuit must reject it
+        deposit: u64,         // public amount in
         claim_jurisdiction: Option<u64>, // override: senderJurisdiction public input
     }
     impl Payment {
@@ -279,6 +279,7 @@ mod tests {
         i.set("extDataHash", BigInt::from(EXT_DATA_HASH));
         i.set("nonce", BigInt::from(EXT_DATA_HASH));
         i.set("withdrawal", BigInt::from(p.withdrawal));
+        i.set("deposit", BigInt::from(p.deposit));
 
         let idx = chain
             .identity_leaves
@@ -521,7 +522,7 @@ mod tests {
 
     #[test]
     #[ignore]
-    fn withdrawals_count_and_deposits_are_rejected() -> Result<()> {
+    fn withdrawals_count_towards_limits() -> Result<()> {
         let ada = Person::new(42, NG, 1);
         let chain = Chain::with_people(&[&ada]);
         // 15 to Bob + 3 withdrawn = 18 <= 18.75: passes, and the record says 18.
@@ -529,11 +530,36 @@ mod tests {
         let out = prove(&inputs(&ada, &chain, &ok))?;
         assert_eq!(open(&out, 0, d_ng()).2, 18 * USD);
         // 15 + 4 = 19 > 18.75
-        let bad = Payment { withdrawal: 4 * USD, ..ok.clone() };
-        assert!(prove(&inputs(&ada, &chain, &bad)).is_err());
-        // A balanced deposit (public amount in, notes add up) is still rejected.
-        let dep = Payment { withdrawal: 0, deposit: 3 * USD, ..ok.clone() };
-        assert!(prove(&inputs(&ada, &chain, &dep)).is_err());
+        let over = Payment { withdrawal: 4 * USD, ..ok.clone() };
+        assert!(prove(&inputs(&ada, &chain, &over)).is_err());
+        // Withdrawing 4 while claiming 0 in the private witness: public amount gives it away.
+        let mut lie = inputs(&ada, &chain, &over);
+        lie.set("withdrawal", BigInt::from(0u64));
+        assert!(prove(&lie).is_err());
+        Ok(())
+    }
+
+    #[test]
+    #[ignore]
+    fn deposits_fund_your_own_balance_and_count_only_what_you_pay() -> Result<()> {
+        let ada = Person::new(42, NG, 1);
+        let chain = Chain::with_people(&[&ada]);
+        // Fund 50 USD (above the daily limit) into Ada's own balance: sends nothing.
+        let fund = Payment { deposit: 50 * USD, ..Payment::domestic(ng_pack(), [0, 0], 0) };
+        let out = prove(&inputs(&ada, &chain, &fund))?;
+        assert_eq!(open(&out, 0, d_ng()).2, 0);
+        // Deposit 3 and pay Bob 15 in one go: 15 counts.
+        let pay = Payment { deposit: 3 * USD, ..Payment::domestic(ng_pack(), [10 * USD, 10 * USD], 15 * USD) };
+        let out = prove(&inputs(&ada, &chain, &pay))?;
+        assert_eq!(open(&out, 0, d_ng()).2, 15 * USD);
+        // Deposit that pays Bob over the per-payment limit is still refused.
+        let big = Payment { deposit: 50 * USD, ..Payment::domestic(ng_pack(), [0, 0], 19 * USD) };
+        assert!(prove(&inputs(&ada, &chain, &big)).is_err());
+        // Deposit and withdrawal in the same call: refused, even when they cancel out.
+        let mut both = inputs(&ada, &chain, &Payment::domestic(ng_pack(), [10 * USD, 10 * USD], 15 * USD));
+        both.set("deposit", BigInt::from(USD));
+        both.set("withdrawal", BigInt::from(USD));
+        assert!(prove(&both).is_err());
         Ok(())
     }
 

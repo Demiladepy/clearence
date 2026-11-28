@@ -1,0 +1,74 @@
+{
+  "adaSpentTodayUsd": 18.0,
+  "network": "testnet",
+  "pool": "CA2DGBLA6H2Q6W4JOHOT2UGXEWIJVQSNFDB2GN3PQSZRUNEBDNJOTIQE",
+  "ranAt": 1795785301,
+  "steps": [
+    {
+      "explorer": "https://stellar.expert/explorer/testnet/tx/602aa29b8858aba757212cf3ff64ae1456763988d81cd1b7cf4d16d74c2528a2",
+      "fee_charged_stroops": 12143099,
+      "opened_by_operators": [
+        {
+          "record": 0,
+          "sent_usd": 0.0,
+          "travel_rule_flag": false
+        }
+      ],
+      "proving_ms": 10535,
+      "step": "Ada funds 25 CLRUSD (NG)",
+      "tx": "602aa29b8858aba757212cf3ff64ae1456763988d81cd1b7cf4d16d74c2528a2"
+    },
+    {
+      "explorer": "https://stellar.expert/explorer/testnet/tx/e7e9e0372eb5e7562b284f06c62d3babb945a4b380fd93b84e64e8fdafdd97b8",
+      "fee_charged_stroops": 12138053,
+      "opened_by_operators": [
+        {
+          "record": 0,
+          "sent_usd": 15.0,
+          "travel_rule_flag": false
+        },
+        {
+          "record": 1,
+          "sent_usd": 15.0,
+          "travel_rule_flag": false
+        }
+      ],
+      "proving_ms": 2227,
+      "step": "Ada pays Bob 15 (NG -> NG)",
+      "tx": "e7e9e0372eb5e7562b284f06c62d3babb945a4b380fd93b84e64e8fdafdd97b8"
+    },
+    {
+      "explorer": "https://stellar.expert/explorer/testnet/tx/d136e0ac99ecc565ab17ed03acd488c9c41b744d341ae15c2effb99dec03d310",
+      "fee_charged_stroops": 12138798,
+      "opened_by_operators": [
+        {
+          "record": 0,
+          "sent_usd": 3.0,
+          "travel_rule_flag": false
+        },
+        {
+          "record": 1,
+          "sent_usd": 3.0,
+          "travel_rule_flag": false
+        }
+      ],
+      "proving_ms": 2186,
+      "step": "Ada pays Kofi 3 (NG -> GH)",
+      "tx": "d136e0ac99ecc565ab17ed03acd488c9c41b744d341ae15c2effb99dec03d310"
+    },
+    {
+      "explorer": "https://stellar.expert/explorer/testnet/tx/01ee9f9601ce0af451359fe1075498c6dfd8e6a59ee8bea8501ae878c0cb5fe0",
+      "fee_charged_stroops": 12142724,
+      "opened_by_operators": [
+        {
+          "record": 0,
+          "sent_usd": 3.0,
+          "travel_rule_flag": false
+        }
+      ],
+      "proving_ms": 2212,
+      "step": "Kofi withdraws 3 (GH)",
+      "tx": "01ee9f9601ce0af451359fe1075498c6dfd8e6a59ee8bea8501ae878c0cb5fe0"
+    }
+  ]
+}

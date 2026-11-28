@@ -4,6 +4,7 @@
 //!   1. the rule-registry contract (computed on-chain when a pack is published),
 //!   2. the Rust reference below,
 //!   3. the `PackHash` circuit.
+//!
 //! The golden values are the NG and GH v1 pack hashes read back from the live
 //! testnet registry CDEXDT6BPD5XM7ASG2DQNVEJK37MX75TNSF4F27RD7LU5N7EPKVLOWCB.
 

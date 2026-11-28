@@ -1,0 +1,13 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index 1dec099..3209874 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -2,6 +2,8 @@
+ members = [
+     "circuit-keys",
+     "circuits",
++    "clearance-e2e",
++    "clearance-wasm",
+     "cli",
+     "contracts/*",
+     "e2e-tests",

@@ -12,9 +12,9 @@ pragma circom 2.2.2;
 //   3. Packs: senderPackHash and receiverPackHash are the hashes of the private
 //      pack values, so the limits, thresholds and operator keys used below are
 //      exactly what each country's operator published in the rule registry.
-//   4. Amount: sent = inputs - change, change goes back to the sender's own
-//      key, and any public amount is a withdrawal (counted in sent). Deposits
-//      do not use this circuit.
+//   4. Amount: sent = payment to the receiver + withdrawal. Change goes back
+//      to the sender's own key. A deposit into the sender's own balance sends
+//      nothing; a deposit that also pays someone counts that payment.
 //   5. Limits: sent <= per-payment limit, and today's total <= daily limit,
 //      with the sender's tier limits from the sender's pack (DailyBudget).
 //   6. Travel Rule: flag = todaysTotal >= min(senderThreshold, receiverThreshold).
@@ -64,7 +64,8 @@ template ClearanceTransaction(nIns, nOuts, levels, idLevels, budgetLevels) {
     signal input outAmount[nOuts];
     signal input outPubkey[nOuts];
     signal input outBlinding[nOuts];
-    signal input withdrawal;            // publicAmount = -withdrawal
+    signal input deposit;               // publicAmount = deposit - withdrawal
+    signal input withdrawal;
 
     /** PRIVATE: identity **/
     signal input idSecret;
@@ -162,15 +163,16 @@ template ClearanceTransaction(nIns, nOuts, levels, idLevels, budgetLevels) {
     // ---- 4. amount sent ----
     // Change goes back to the sender (same pubkey as the spent notes).
     outPubkey[1] === core.inPublicKey[0];
-    // Only withdrawals may have a public amount; it counts as sent.
+    // Public amount is a deposit or a withdrawal (never both), each < 2^64.
+    component rD = Num2Bits(64);
+    rD.in <== deposit;
     component rW = Num2Bits(64);
     rW.in <== withdrawal;
-    publicAmount + withdrawal === 0;
-    var sumIns = 0;
-    for (var i = 0; i < nIns; i++) {
-        sumIns += inAmount[i];
-    }
-    signal sent <== sumIns - outAmount[1]; // = outAmount[0] + withdrawal; range-checked in DailyBudget
+    deposit * withdrawal === 0;
+    publicAmount === deposit - withdrawal;
+    // What leaves the sender: the payment output plus any withdrawal.
+    // Range-checked (< 2^64) in DailyBudget.
+    signal sent <== outAmount[0] + withdrawal;
 
     // ---- 5. limits ----
     component budget = DailyBudget(budgetLevels);

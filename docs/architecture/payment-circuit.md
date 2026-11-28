@@ -18,7 +18,7 @@ by the pieces below.
 | 1 | Every input note is spent with the sender's `noteKey` | `IdentityKeys` |
 | 2 | Sender is on their country's allow-list at `tier` | `ClearanceIdentity` |
 | 3 | Pack values hash to `senderPackHash` and `receiverPackHash` | `PackHash` x2 |
-| 4 | `sent = inputs - change`; change to the sender's own key; public amount only as withdrawal | |
+| 4 | `sent = payment + withdrawal`; change to the sender's own key; public amount = deposit or withdrawal | |
 | 5 | `sent <= perPayment`, `todaysTotal <= daily`, sender's tier and pack | `DailyBudget` |
 | 6 | Travel Rule flag `todaysTotal >= min(senderThreshold, receiverThreshold)` | |
 | 7 | Record `(idCommitment, receiverPubKey, 2*sent + flag)` sealed to each operator key from the packs | upstream `GlobalViewKeyEncryption` x2 |
@@ -48,8 +48,11 @@ No amount, sender identity or receiver appears in the public signals (asserted i
   so it is the key the operator published in the registry. No separate key input to trust.
 - **Domestic payments also produce two records.** Both go to the same operator, so a cross-border
   payment looks the same size on-chain as a domestic one.
-- **Deposits are out of scope for this circuit.** A deposit moves public funds into the sender's own
-  note and is visible on-chain. Withdrawals are allowed and count towards `sent`.
+- **Deposits go through the same circuit.** `sent = payment output + withdrawal`, so funding your
+  own private balance sends 0 (but still needs KYC and a budget step), and a deposit that also pays
+  someone counts that payment. Withdrawals count towards `sent`.
+- **Deploy the pool with fee 0.** The upstream pool takes its fee from the public amount, which this
+  circuit would count as a withdrawal, so a fee would eat into the sender's limits.
 - **Travel Rule flag is cumulative per day,** so splitting a payment does not avoid the flag.
 
 ## Cost

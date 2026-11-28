@@ -1,0 +1,13 @@
+diff --git a/tools/circuit-compiler/src/lib.rs b/tools/circuit-compiler/src/lib.rs
+index a2d2b90..e4d651a 100644
+--- a/tools/circuit-compiler/src/lib.rs
++++ b/tools/circuit-compiler/src/lib.rs
+@@ -79,6 +79,8 @@ fn groth16_key_circuits() -> Vec<String> {
+             .map(|stem| (*stem).to_owned()),
+     );
+     circuits.push(KEY_OWNERSHIP_CIRCUIT.to_owned());
++    // Clearance payment circuit (circuits/src/clearance/clearance_tx_2_2.circom).
++    circuits.push("clearance_tx_2_2".to_owned());
+     circuits
+ }
+ 

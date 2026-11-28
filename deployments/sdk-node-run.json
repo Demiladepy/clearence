@@ -1,0 +1,96 @@
+{
+  "ranAt": "2026-11-27T13:37:01.283Z",
+  "pool": "CA2DGBLA6H2Q6W4JOHOT2UGXEWIJVQSNFDB2GN3PQSZRUNEBDNJOTIQE",
+  "steps": [
+    {
+      "step": "NG operator issues Ada tier 1",
+      "tx": "c73a1d745dc1b94a871e030409d90a6adade9de2045c3a20fde8f3a36161df14"
+    },
+    {
+      "step": "GH operator issues Kofi tier 1",
+      "tx": "cf421884aeaa1d53237124409d5bd21ff2db6f605be5930bb26f0ba54166ef6a"
+    },
+    {
+      "step": "Ada deposits 25",
+      "tx": "561a19df642896e3eff0c865c67f47c7e874b380b51b0065aef9af7fc6528485",
+      "explorer": "https://stellar.expert/explorer/testnet/tx/561a19df642896e3eff0c865c67f47c7e874b380b51b0065aef9af7fc6528485",
+      "provingMs": 6581,
+      "totalMs": 10988
+    },
+    {
+      "step": "Ada pays Bob 15 (NG -> NG)",
+      "tx": "dee127173fd1c97adef4f9ae275462eb7f8f297919399f5382bee98da8035db7",
+      "explorer": "https://stellar.expert/explorer/testnet/tx/dee127173fd1c97adef4f9ae275462eb7f8f297919399f5382bee98da8035db7",
+      "provingMs": 6500,
+      "totalMs": 16319
+    },
+    {
+      "step": "Ada pays Kofi 3 (NG -> GH)",
+      "tx": "4742ee65c7f9b2c59c7283c88f5f830d691633003b8b5fbd12cc0a5869258320",
+      "explorer": "https://stellar.expert/explorer/testnet/tx/4742ee65c7f9b2c59c7283c88f5f830d691633003b8b5fbd12cc0a5869258320",
+      "provingMs": 6507,
+      "totalMs": 12842
+    },
+    {
+      "step": "Kofi withdraws 3 (GH)",
+      "tx": "80b81fc37d93d6e9841e0440b3f7be400b15424970439c7873faae6452dfa414",
+      "explorer": "https://stellar.expert/explorer/testnet/tx/80b81fc37d93d6e9841e0440b3f7be400b15424970439c7873faae6452dfa414",
+      "provingMs": 6655,
+      "totalMs": 16387
+    }
+  ],
+  "openedByOperators": [
+    {
+      "tx": "dee127173fd1c97adef4f9ae275462eb7f8f297919399f5382bee98da8035db7",
+      "by": "NG",
+      "recordId": "0025566170786611200-0000000006",
+      "sender": "20467325247461382558230674484096891669744443319781814743663330409405304489740",
+      "receiver": "19319224988381776340788927507244425209499508260623942481924890152756505679641",
+      "amountUsd": 15,
+      "epoch": 20784,
+      "travelRuleFlag": false,
+      "senderJurisdiction": "NG",
+      "receiverJurisdiction": "NG",
+      "packVersion": "NG-v1"
+    },
+    {
+      "tx": "4742ee65c7f9b2c59c7283c88f5f830d691633003b8b5fbd12cc0a5869258320",
+      "by": "NG",
+      "recordId": "0025566183671513088-0000000006",
+      "sender": "20467325247461382558230674484096891669744443319781814743663330409405304489740",
+      "receiver": "18051622169527057955937614096533360036225906978957217979159976974164610678471",
+      "amountUsd": 3,
+      "epoch": 20784,
+      "travelRuleFlag": false,
+      "senderJurisdiction": "NG",
+      "receiverJurisdiction": "GH",
+      "packVersion": "NG-v1"
+    },
+    {
+      "tx": "4742ee65c7f9b2c59c7283c88f5f830d691633003b8b5fbd12cc0a5869258320",
+      "by": "GH",
+      "recordId": "0025566183671513088-0000000006",
+      "sender": "20467325247461382558230674484096891669744443319781814743663330409405304489740",
+      "receiver": "18051622169527057955937614096533360036225906978957217979159976974164610678471",
+      "amountUsd": 3,
+      "epoch": 20784,
+      "travelRuleFlag": false,
+      "senderJurisdiction": "NG",
+      "receiverJurisdiction": "GH",
+      "packVersion": "GH-v1"
+    },
+    {
+      "tx": "80b81fc37d93d6e9841e0440b3f7be400b15424970439c7873faae6452dfa414",
+      "by": "GH",
+      "recordId": "0025566196556451840-0000000007",
+      "sender": "11556281492520245458832265505289228685378352631503967048476354488206870803076",
+      "receiver": "18051622169527057955937614096533360036225906978957217979159976974164610678471",
+      "amountUsd": 3,
+      "epoch": 20784,
+      "travelRuleFlag": false,
+      "senderJurisdiction": "GH",
+      "receiverJurisdiction": "GH",
+      "packVersion": "GH-v1"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+/* tslint:disable */
+/* eslint-disable */
+export const memory: WebAssembly.Memory;
+export const __wbg_prover_free: (a: number, b: number) => void;
+export const compress: (a: number, b: number, c: number, d: number, e: number) => void;
+export const hash2: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
+export const hash3: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number) => void;
+export const listTreeProof: (a: number, b: number, c: number, d: number, e: number) => void;
+export const listTreeRoot: (a: number, b: number, c: number, d: number) => void;
+export const noteTreeProof: (a: number, b: number, c: number, d: number, e: number) => void;
+export const noteTreeRoot: (a: number, b: number, c: number, d: number) => void;
+export const openRecord: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number) => void;
+export const operatorPublicKey: (a: number, b: number, c: number) => void;
+export const prover_new: (a: number, b: number, c: number, d: number, e: number) => void;
+export const prover_prove: (a: number, b: number, c: number, d: number) => void;
+export const prover_publicSignals: (a: number, b: number, c: number, d: number) => void;
+export const rust_sqlite_wasm_host_epoch_timestamp_in_ms: (a: number) => number;
+export const rust_sqlite_wasm_host_sleep: (a: bigint, b: number) => void;
+export const rust_sqlite_wasm_host_random: (a: number, b: number) => number;
+export const rust_sqlite_wasm_abort: () => void;
+export const rust_sqlite_wasm_assert_fail: (a: number, b: number, c: number, d: number) => void;
+export const rust_sqlite_wasm_calloc: (a: number, b: number) => number;
+export const rust_sqlite_wasm_malloc: (a: number) => number;
+export const rust_sqlite_wasm_free: (a: number) => void;
+export const rust_sqlite_wasm_getentropy: (a: number, b: number) => number;
+export const rust_sqlite_wasm_host_fill_entropy: (a: number, b: number) => number;
+export const rust_sqlite_wasm_host_localtime: (a: bigint, b: number) => number;
+export const rust_sqlite_wasm_localtime: (a: number) => number;
+export const rust_sqlite_wasm_realloc: (a: number, b: number) => number;
+export const sqlite3_os_end: () => number;
+export const sqlite3_os_init: () => number;
+export const __wbindgen_export: (a: number, b: number) => number;
+export const __wbindgen_export2: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_export3: (a: number) => void;
+export const __wbindgen_add_to_stack_pointer: (a: number) => number;
+export const __wbindgen_export4: (a: number, b: number, c: number) => void;

@@ -6,7 +6,8 @@
 #   circuits/src/*.circom          -> upstream circuits/src/clearance/
 #   circuits/test/circuits/*.circom-> upstream circuits/src/test/circuits/
 #   circuits/test/rust/*.rs        -> upstream circuits/src/test/
-#   contracts/rule-registry/       -> upstream contracts/rule-registry/
+#   contracts/<name>/              -> upstream contracts/<name>/ (rule-registry, clearance-pool)
+#   e2e/                           -> upstream clearance-e2e/
 #   upstream-patches/*.patch       -> applied to upstream (the only edits to upstream files)
 #
 # Idempotent: safe to run before every build. Never edit the copies inside
@@ -31,20 +32,26 @@ for p in "$ROOT"/upstream-patches/*.patch; do
 done
 
 # 2. Copy our sources (delete stale copies first, so renames do not linger).
-rm -rf "$UP/circuits/src/clearance" "$UP/contracts/rule-registry"
+rm -rf "$UP/circuits/src/clearance" "$UP/clearance-e2e"
+for c in "$ROOT"/contracts/*/; do rm -rf "$UP/contracts/$(basename "$c")"; done
 rm -f "$UP"/circuits/src/test/clearance_*.rs
 mkdir -p "$UP/circuits/src/clearance"
 cp "$ROOT"/circuits/src/*.circom "$UP/circuits/src/clearance/"
 cp "$ROOT"/circuits/test/circuits/*.circom "$UP/circuits/src/test/circuits/"
 cp "$ROOT"/circuits/test/rust/*.rs "$UP/circuits/src/test/"
-mkdir -p "$UP/contracts"
-cp -r "$ROOT/contracts/rule-registry" "$UP/contracts/rule-registry"
-rm -rf "$UP/contracts/rule-registry/target"
+for c in "$ROOT"/contracts/*/; do
+  n="$(basename "$c")"
+  cp -r "$c" "$UP/contracts/$n"
+  rm -rf "$UP/contracts/$n/target" "$UP/contracts/$n/test_snapshots"
+done
+cp -r "$ROOT/e2e" "$UP/clearance-e2e"
+rm -rf "$UP/clearance-wasm" && cp -r "$ROOT/packages/sdk-wasm" "$UP/clearance-wasm" && rm -rf "$UP/clearance-wasm/pkg" "$UP/clearance-wasm/target"
+rm -rf "$UP/clearance-e2e/target" "$UP/clearance-e2e/test_snapshots"
 
 # 3. Keep the overlay out of the submodule's status.
 EXCL="$(git -C "$UP" rev-parse --git-path info/exclude)"
 case "$EXCL" in /*) ;; *) EXCL="$UP/$EXCL" ;; esac
-for pat in /circuits/src/clearance/ /contracts/rule-registry/ \
+for pat in /circuits/src/clearance/ /contracts/rule-registry/ /contracts/clearance-pool/ /clearance-e2e/ /clearance-wasm/ \
            /circuits/src/test/circuits/clearance_budget_test.circom \
            /circuits/src/test/clearance_*.rs \
            /circuits/src/test/circuits/pack_hash_test.circom \

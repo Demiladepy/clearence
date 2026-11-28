@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@clearance/sdk": "file:../packages/sdk",
+    "@clearance/sdk": "file:vendor/clearance-sdk-0.1.0.tgz",
     "@creit-tech/stellar-wallets-kit": "npm:@jsr/creit-tech__stellar-wallets-kit@^2.8.0",
     "buffer": "^6.0.3",
     "motion": "^14.14.0",
